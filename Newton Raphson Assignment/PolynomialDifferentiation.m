@@ -1,13 +1,28 @@
-function [ coeff_out ] = PolynomialDifferentiation( coeff_in, diff_order )
+function [ coeffOut ] = PolynomialDifferentiation( coeffIn, diffOrder )
 %UNTITLED6 Summary of this function goes here
-%   Detailed explanation goes here
+%   coeff_in = [a0 a1 ... an] 
+%       specifies input polynomial p(x) = a0 + a1*x + ... an*x^n
+%   diff_order
+%       the order of the differentiation to be pergormed on the input
+%       polynomial
+%   coeff_out = [b0 b1 ... bn] 
+%       specifies the output polynomial p(x) = b0 + b1*x + ... bn*x^n
 
-% TODO zero order drivative?
+% TODO zero order derivative?
+% TODO assert input formatting
 
-polynomial_order = length(coeff_in)-1;
-coeff_out = zeros(polynomial_order-1);
-for power_i = 1:1:polynomial_order
-    coeff_out(end-(power_i-1)) = coeff_in(end-(power_i))*factorial(power_i)/factorial(diff_order);
 
+if diffOrder > 1 % Recursive call if higher order derivative
+    coeffIn = PolynomialDifferentiation(coeffIn, diffOrder-1);
 end
-
+if length(coeffIn) < 2
+    coeffOut = [];
+elseif diffOrder == 0
+    coeffOut = coeffIn;
+else
+    polynomialOrder = length(coeffIn)-1;
+    coeffOut = zeros(1,polynomialOrder);
+    for iPower = 1:1:polynomialOrder
+        coeffOut(iPower) = coeffIn(iPower+1)*iPower;
+    end
+end
