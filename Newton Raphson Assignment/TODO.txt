@@ -1,0 +1,5 @@
+- Check that the break works if the step hits a inf point, write unit test DONE
+- Check that all the conventions are followed DONE
+- Check that it works for k>n DONE
+- Double check that each file is foolows spec.
+- Package files according to lab-PM, EXCLUDING test files!
