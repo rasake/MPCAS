@@ -16,10 +16,16 @@ tolerance = 0.0001;
 iterationValues = NewtonRaphson(poly, start_guess, tolerance);
 assert( abs(iterationValues(end)== expected_min) < tolerance)
 
+%% Test 3: Polynom where fBis is zero so the step goes to -inf    
+poly = [10 2];
+start_guess = 1.5;
+tolerance = 0.0001;
+iterationValues = NewtonRaphson(poly, start_guess, tolerance);
+assert( iterationValues(end)== -Inf)
 
-
-
-%% Test 1: Polynom where fBis is zero so the step goes to inf
-
-
-%% Test 1: Non converging polynom?
+%% Test 4: Polynom where fBis is zero so the step goes to inf    
+poly = [-10 -2];
+start_guess = 1.5;
+tolerance = 0.0001;
+iterationValues = NewtonRaphson(poly, start_guess, tolerance);
+assert( iterationValues(end)== Inf)
