@@ -32,15 +32,19 @@ computedDerivative = PolynomialDifferentiation( poly, 2);
 assert( isequal(expectedDerivative, computedDerivative) )
 
 %% Test 5: Third order derivative
-
 poly = [0 0 0 2];
 expectedDerivative = [12];
 computedDerivative = PolynomialDifferentiation( poly, 3);
 assert( isequal(expectedDerivative, computedDerivative) )
 
 %% Test 6: Zero order derivative
-
 poly = [0 0 0 2];
 expectedDerivative = [0 0 0 2];
 computedDerivative = PolynomialDifferentiation( poly, 0);
+assert( isequal(expectedDerivative, computedDerivative) )
+
+%% Test 7: Higher diff. order than polyn. order
+poly = [2 3 4];
+expectedDerivative = [];
+computedDerivative = PolynomialDifferentiation( poly, 5);
 assert( isequal(expectedDerivative, computedDerivative) )
