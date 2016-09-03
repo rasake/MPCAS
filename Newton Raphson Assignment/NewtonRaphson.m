@@ -1,6 +1,19 @@
 function [ xIterations ] = NewtonRaphson( coefficients, startingPoint, tol )
-%UNTITLED3 Summary of this function goes here
-%   Detailed explanation goes here
+% NewtonRaphson Iterative method to find the minimum of a polynomial
+%
+% INPUT
+% coefficients = [a0 a1 ... an] 
+%   specifies input polynomial p(x) = a0 + a1*x + ... an*x^n
+%  startingPoint
+%   initial guess for the min
+%  tol
+%   absolute tolerance
+%
+% OTPUT
+% xIterations
+%   Array containing all the iterations for the miminum, starting from the
+%   initial guess and ending on the final estimate for which the tolerance
+%   was achieved
 
 xIterations = startingPoint;
 condition = true;
