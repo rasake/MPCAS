@@ -10,6 +10,13 @@ while condition
     fBis = Polynomial(xOld, PolynomialDifferentiation(coefficients,2));
     xNew = NewtonRaphsonStep( xOld, fPrime, fBis );
     xIterations = [xIterations xNew];
+    if abs(xNew) == Inf
+        message = ['Newton Raphson iteration aborted at i='  num2str(length(xIterations)) ' due to unbounded growth in the x variable, \n last iteration at x=' num2str(xNew) ', next to last iteration at x=' num2str(xOld) '. \n'];
+        fprintf(message)
+        break
+    end    
+    
     condition = abs(xNew - xOld) > tol;
+
 end
 end
