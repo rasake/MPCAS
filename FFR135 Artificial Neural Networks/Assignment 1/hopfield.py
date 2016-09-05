@@ -8,45 +8,49 @@ import numpy as np
 
 class HopfieldNetwork:
     def __init__(self, nbr_of_cells, initial_pattern = None, initial_weights = None):
-        """assert(nbr_of_cells >0)
-        if initial_pattern == None:
-            initial_pattern = ones(nbr_of_cells)
-        if initial_weights == None:
-            initial_weights= zero_matrix(nbr_of_cells, nbr_of_cells)
-        assert(len(initial_pattern) == nbr_of_cells) # size operation correct?
-        """
-        self.__NBR_OF_CELLS = nbr_of_cells
-        self.__neuron_state_vector = initial_pattern
-        self.__weights = initial_weights
-        self.__updates_since_last_reset = 0
+        if initial_pattern is None:
+            initial_pattern = np.ones([nbr_of_cells, 1])
+        if initial_weights is None:
+            initial_weights = np.ones([nbr_of_cells, nbr_of_cells])
+        self._NBR_OF_CELLS = nbr_of_cells
+        self.neuron_state_vector = initial_pattern
+        self.weights = initial_weights
+        self._updates_since_last_reset = 0
 
     @property
     def neuron_state_vector(self):
-        return self.__neuron_state_vector
+        return self._neuron_state_vector
+
+    @neuron_state_vector.setter
+    def neuron_state_vector(self, pattern_vector):
+        if len(pattern_vector) != self._NBR_OF_CELLS:
+            raise ValueError("Size of Neural Network cannot change")
+        self._neuron_state_vector = pattern_vector
 
     @property
     def weights(self):
-        return self.__weights
+        return self._weights
 
     @weights.setter
-    def temperature(self, new_weights):
-        """
-        if shape(self.__weights) != shape(new_weights):
+    def weights(self, new_weights):
+        if np.shape(new_weights) != (self._NBR_OF_CELLS, self._NBR_OF_CELLS):
             raise ValueError("Weight matrix cannot change size")
-        """
-        self.__weights = new_weights
-        
+        self._weights = np.copy(new_weights)                
+
     
     def feed_pattern(self, pattern_vector):
-        #TODO assert length
-        self.__neuron_state_vector    
+        self.neuron_state_vector = pattern_vector
 
-        
-        
+               
     def store_pattern(self, pattern_vector):
-        #TODO assert length
-        temp_weights = pattern_vector @ np.transpose(pattern_vector) / self.__NBR_OF_CELLS
-        self.__weightsnp.fill_diagonal(temp_weights,0)
+        if len(pattern_vector) != self._NBR_OF_CELLS:
+            raise ValueError("Pattern length must match number of neurons")
+        temp_weights = pattern_vector @ np.transpose(pattern_vector) / self._NBR_OF_CELLS
+        self._weights = np.fill_diagonal(temp_weights,0)
 
     def update_state(self):
-        self.neuron_state_vector = self.__weights @ self.__neuron_state_vector
+        new_state = self._weights @ self._neuron_state_vector
+        is_done = np.array_equal(self.neuron_state_vector, new_state)
+        self.neuron_state_vector = np.copy(new_state)
+        self._updates_since_last_reset +=1
+        return is_done
