@@ -46,10 +46,11 @@ class HopfieldNetwork:
         if len(pattern_vector) != self._NBR_OF_CELLS:
             raise ValueError("Pattern length must match number of neurons")
         temp_weights = pattern_vector @ np.transpose(pattern_vector) / self._NBR_OF_CELLS
-        self._weights = np.fill_diagonal(temp_weights,0)
+        np.fill_diagonal(temp_weights,0)       
+        self._weights += temp_weights
 
     def update_state(self):
-        new_state = self._weights @ self._neuron_state_vector
+        new_state = np.sign(self._weights @ self._neuron_state_vector)
         is_done = np.array_equal(self.neuron_state_vector, new_state)
         self.neuron_state_vector = np.copy(new_state)
         self._updates_since_last_reset +=1
