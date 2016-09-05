@@ -1,2 +1,2 @@
-# Stochastic-Optimization
-Assignments for FFR105 Stochastic Optimization
+# MPCAS
+Assignments for master courses in Complex Adaptive Systems
