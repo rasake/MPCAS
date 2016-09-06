@@ -29,9 +29,13 @@ def test_stored_patterns(hopfield_network, stored_patterns):
     return one_step_errors/ (len(stored_patterns) * hopfield_network._NBR_OF_CELLS)
 
 def simulate_one_step_error_prob(pattern_length, nbr_of_patterns):
-    hopfield_network = hf.HopfieldNetwork(pattern_length)
-    stored_patterns = store_random_patterns(hopfield_network, nbr_of_patterns)
-    return test_stored_patterns(hopfield_network, stored_patterns)
+    nbr_of_cycles = int(max(1, 1000000/(pattern_length*nbr_of_patterns)))
+    prob_list = np.zeros(nbr_of_cycles)
+    for i in range(nbr_of_cycles):
+        hopfield_network = hf.HopfieldNetwork(pattern_length)
+        stored_patterns = store_random_patterns(hopfield_network, nbr_of_patterns)
+        prob_list[i] = test_stored_patterns(hopfield_network, stored_patterns)  
+    return np.mean(prob_list)
 
 def simulate_prob_curve():
     N = [100, 200]
