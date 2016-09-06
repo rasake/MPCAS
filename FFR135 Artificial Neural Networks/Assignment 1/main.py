@@ -20,9 +20,7 @@ def store_random_patterns(hopfield_network, nbr_of_patterns):
         hopfield_network.store_pattern(pattern_i)
     return patterns
 
-def simulate_one_step_error_prob(pattern_length, nbr_of_patterns):
-    hopfield_network = hf.HopfieldNetwork(pattern_length)
-    stored_patterns = store_random_patterns(hopfield_network, nbr_of_patterns)
+def test_stored_patterns(hopfield_network, stored_patterns):
     one_step_errors = 0
     for pattern_i in stored_patterns:
         hopfield_network.feed_pattern(pattern_i)
@@ -30,6 +28,10 @@ def simulate_one_step_error_prob(pattern_length, nbr_of_patterns):
         one_step_errors += np.sum(abs(pattern_i - hopfield_network.neuron_state_vector)) / 2 # Dvision by two since bits are either 1 or -1 so the difference is 2 or -2 if a bit flips
     return one_step_errors/ (len(stored_patterns) * hopfield_network._NBR_OF_CELLS)
 
+def simulate_one_step_error_prob(pattern_length, nbr_of_patterns):
+    hopfield_network = hf.HopfieldNetwork(pattern_length)
+    stored_patterns = store_random_patterns(hopfield_network, nbr_of_patterns)
+    return test_stored_patterns(hopfield_network, stored_patterns)
 
 def simulate_prob_curve():
     N = [100, 200]
