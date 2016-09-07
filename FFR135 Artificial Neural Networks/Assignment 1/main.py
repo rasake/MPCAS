@@ -42,20 +42,21 @@ def simulate_prob_curve():
     P = [10, 20, 30, 40, 50, 75, 100, 150, 200]
     P_over_N = np.zeros(len(N)*len(P))
     probabilities = np.zeros(len(N)*len(P))
-    for i, N_i in enumerate(N):
-        for j, P_i in enumerate(P):
-            P_over_N[i+j] = P_i / N_i
-            probabilities[i+j] = simulate_one_step_error_prob(N_i,P_i)
+    k = 0;
+    for N_i in N:
+        for P_i in P:
+            P_over_N[k] = P_i / N_i
+            probabilities[k] = simulate_one_step_error_prob(N_i,P_i)
+            k += 1
     return (P_over_N, probabilities)
 
 def make_prob_comp_plot():
-    x = np.linspace(0.001,1)
+    x = np.linspace(0.001,2.5)
     analytical_prob = [0.5*(1-math.erf(math.sqrt(1/x_i/2))) for x_i in x]
     simulated_curve = simulate_prob_curve()
     plt.plot(simulated_curve[0], simulated_curve[1], 'rx')
     plt.plot(x, analytical_prob)    
     plt.show()
-    
 
 make_prob_comp_plot()
     
