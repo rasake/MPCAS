@@ -27,16 +27,20 @@ class HopfieldNetwork:
             raise ValueError("Size of Neural Network cannot change")
         self._neuron_state_vector = np.copy(pattern_vector)
 
+
     def set_neuron(self,index, value):
-        print (value)
-        if value != 1 or value != -1:
+        if (value != 1 and value != -1):
             message = ("Cannot set neuron " + str(index) + " to " + str(value)
                         + ", neuron states must be either +1 or -1.")
             raise ValueError(message)
+        if index < 0:
+            raise ValueError("Index must be positive")
+        if (index > self._NBR_OF_CELLS - 1):
+            message = ("Cannot set neuron, index " + str(index) + " out of bounds "
+                        + "for Hopfield Network with size " + str(self._NBR_OF_CELLS)  )
+            raise IndexError(message)
         self._neuron_state_vector[index] = value
             
-
-
     @property
     def weights(self):
         return self._weights
@@ -60,10 +64,16 @@ class HopfieldNetwork:
         np.fill_diagonal(temp_weights,0)       
         self.weights += temp_weights
 
+
     def update_state(self, synchronous = True):
-        if synchronous:
+        if synchronous: #Synchronous updating, all bits updated at once in parallell
             new_state = np.sign(self._weights @ self._neuron_state_vector)
-            is_done = np.array_equal(self.neuron_state_vector, new_state)
+            did_change = np.array_equal(self.neuron_state_vector, new_state)
             self.neuron_state_vector = new_state
+        else: #Asynchronous updating, only one bit will change
+            r = np.random.randint(0, self._NBR_OF_CELLS) #Start inclusive, stop exclusive
+            new_neuron_value = np.sign( self.weights[r] @ self.neuron_state_vector )
+            did_change = (new_neuron_value == self.neuron_state_vector[r])
+            self.set_neuron(r, new_neuron_value)           
         self._updates_since_last_reset +=1
-        return is_done
+        return did_change
