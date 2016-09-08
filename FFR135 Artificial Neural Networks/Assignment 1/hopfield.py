@@ -16,6 +16,7 @@ class HopfieldNetwork:
         self.neuron_state_vector = initial_pattern
         self.weights = initial_weights
         self._updates_since_last_reset = 0
+        self._pseudo_stable_bits = np.ones([nbr_of_cells, 1])
 
     @property
     def neuron_state_vector(self):
@@ -68,12 +69,17 @@ class HopfieldNetwork:
     def update_state(self, synchronous = True):
         if synchronous: #Synchronous updating, all bits updated at once in parallell
             new_state = np.sign(self._weights @ self._neuron_state_vector)
-            did_change = np.array_equal(self.neuron_state_vector, new_state)
+            is_done = np.array_equal(self.neuron_state_vector, new_state)
             self.neuron_state_vector = new_state
         else: #Asynchronous updating, only one bit will change
             r = np.random.randint(0, self._NBR_OF_CELLS) #Start inclusive, stop exclusive
             new_neuron_value = np.sign( self.weights[r] @ self.neuron_state_vector )
-            did_change = (new_neuron_value == self.neuron_state_vector[r])
+            is_flipped = (new_neuron_value != self.neuron_state_vector[r])
+            if is_flipped:
+                self._pseudo_stable_bits = 0 * self._pseudo_stable_bits
+            else:
+                self._pseudo_stable_bits[r] = 1
+            is_done = np.all()
             self.set_neuron(r, new_neuron_value)           
         self._updates_since_last_reset +=1
-        return did_change
+        return is_done
