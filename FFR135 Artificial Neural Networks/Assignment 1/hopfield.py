@@ -16,7 +16,7 @@ class HopfieldNetwork:
         self.neuron_state_vector = initial_pattern
         self.weights = initial_weights
         self._updates_since_last_reset = 0
-        self._pseudo_stable_bits = np.ones([nbr_of_cells, 1])
+        self._pseudo_stable_bits = np.zeros([nbr_of_cells, 1])
 
     @property
     def neuron_state_vector(self):
@@ -79,7 +79,14 @@ class HopfieldNetwork:
                 self._pseudo_stable_bits = 0 * self._pseudo_stable_bits
             else:
                 self._pseudo_stable_bits[r] = 1
-            is_done = np.all()
+            is_done = np.all(self._pseudo_stable_bits)
             self.set_neuron(r, new_neuron_value)           
         self._updates_since_last_reset +=1
         return is_done
+    
+    def run_until_convergence(self, synchronous = True):
+        is_done = False
+        while not is_done:
+            is_done = self.update_state(synchronous=synchronous)
+        return self.neuron_state_vector, self._updates_since_last_reset
+            
