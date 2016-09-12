@@ -39,22 +39,23 @@ def test_pattern(original_pattern, q):
     store_original_patterns(ann)
     distorted_pattern = distort_pattern(original_pattern, q)
     ann.feed_pattern(distorted_pattern)
-    ann.run_until_convergence(synchronous=False)
-    success = np.array_equal(original_pattern, ann.neuron_state_vector) #or np.array_equal(-original_pattern, ann.neuron_state_vector) 
-#    success = np.array_equal(pp2.SPURIOUS_THREE, ann.neuron_state_vector)
+    ann.run_until_convergence(synchronous=False)    
+    success = np.array_equal(original_pattern, ann.neuron_state_vector)
+    # Alternative conditions for exploratory plots
+    #success = np.array_equal(original_pattern, ann.neuron_state_vector) or np.array_equal(-original_pattern, ann.neuron_state_vector) 
+    #success = np.array_equal(pp2.SPURIOUS_THREE, ann.neuron_state_vector)
     incorrect_bits = int(sum(abs(original_pattern-ann.neuron_state_vector))/2)
-    #print(ann._updates_since_last_reset)
     return success, incorrect_bits
 
 def simulate_successrate(original_pattern, q):
-    nbr_of_trials = 1000
+    nbr_of_trials = 100
     successes = 0
     for i in range(nbr_of_trials):
         successes += test_pattern(original_pattern, q)[0]
     return successes / nbr_of_trials
 
 def simulate_curve(original_pattern):
-    M = 100
+    M = 20
     q_lst = []
     prob_lst = []
     for i in range(M+1):
@@ -82,7 +83,7 @@ def simulate_and_save():
 
 
 def plot_from_file():
-        path = r"C:\Users\Rasmus\Documents\simulation_results1.txt"
+        path = r"C:\Users\Rasmus\Documents\simulation_results.txt"
         with open(path, 'r') as the_file:
             content = the_file.readlines()
             print(content)
@@ -99,8 +100,6 @@ def plot_from_file():
         plt.xlabel("Fractions of bits flipped")
         plt.ylabel("Probability of recognising pattern")
         plt.show()
-        
-        
 
 def plot_sim(pattern, ax):
         q_lst, prob_list = simulate_curve(pattern)
@@ -122,6 +121,33 @@ def main():
     plt.ylabel("Probability of recognising pattern")
     plt.show()
     
+def spurious_investigation():
+    pattern = pp2.PATTERN_THREE
+    q_lst, prob_list = simulate_curve(pattern)
+    plt.plot(q_lst,prob_list)
+    plt.show()
+    diff = pp2.PATTERN_THREE - pp2.SPURIOUS_THREE
+    pp2.print_pattern(diff)
+    
+def test_linear_dependency():
+    print("Rank of matrix with the patterns as rows")
+    A = np.transpose(np.column_stack((pp2.PATTERN_ZERO, pp2.PATTERN_ONE, pp2.PATTERN_TWO, 
+                                      pp2.PATTERN_THREE, pp2.PATTERN_FOUR)))    
+    print(np.linalg.matrix_rank(A))
+    print("Rank of matrix with the patterns excluding Pattern 3")
+    A = np.transpose(np.column_stack((pp2.PATTERN_ZERO, pp2.PATTERN_ONE, pp2.PATTERN_TWO, 
+                                      pp2.PATTERN_FOUR)))    
+    print(np.linalg.matrix_rank(A))
+    print("Rank of matrix with the patterns Pattern 3 replace by the spurious satet")
+    A = np.transpose(np.column_stack((pp2.PATTERN_ZERO, pp2.PATTERN_ONE, pp2.PATTERN_TWO, 
+                                      pp2.PATTERN_FOUR)))    
+    print(np.linalg.matrix_rank(A))
+    print("Rank of matrix with the all the patterns _and_ the spurious three")
+    A = np.transpose(np.column_stack((pp2.PATTERN_ZERO, pp2.PATTERN_ONE, pp2.PATTERN_TWO, 
+                                      pp2.PATTERN_THREE, pp2.PATTERN_FOUR, pp2.SPURIOUS_THREE)))
+    print(np.linalg.matrix_rank(A))
 
 simulate_and_save()
 plot_from_file()
+#test_linear_dependency()
+#spurious_investigation()
