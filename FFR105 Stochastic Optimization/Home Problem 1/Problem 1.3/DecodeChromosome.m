@@ -1,20 +1,18 @@
-function [ x ] = DecodeChromosome( chromosome, variableRange )
+function [ x ] = DecodeChromosome( chromosome, nbrOfVariables,variableRange )
 
 nGenes = size(chromosome,2);
-nHalf = fix(nGenes/2);
+genesPerVariable = nGenes/nbrOfVariables;
 
-x(1) = 0.0;
-for j = 1:nHalf;
-    x(1) = x(1) + chromosome(j)*2^(-j);
-end
-x(1) = -variableRange + 2*variableRange*x(1)/(1-2^(-nHalf));
-
-x(2) = 0.0;
-for j = 1:nHalf;
-    x(2) = x(2) + chromosome(j+nHalf)*2^(-j);
-end
-x(2) = -variableRange + 2*variableRange*x(2)/(1-2^(-nHalf));
-
-
+x = zeros(1, nbrOfVariables);
+for j = 1:nbrOfVariables;
+    startIndex = (j-1)*genesPerVariable + 1;
+    stopIndex = j*genesPerVariable;
+    jTemp = 0;
+    iPower = 1;
+    for iPosition = startIndex:stopIndex
+        jTemp = jTemp + chromosome(iPosition)*2^(-iPower); % jTemp in range [-0.5,0.5]
+        iPower = iPower + 1;
+    end
+    x(j) = -variableRange + 2*variableRange/(1-2^(-genesPerVariable)) * jTemp; % Rescaling to requested range
 end
 
