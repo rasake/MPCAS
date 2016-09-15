@@ -1,10 +1,12 @@
 clear all
-populationSize = 30;
-numberOfGenes = 40;
+populationSize = 50;
+numberOfGenes = 30;
 crossOverProbability = 0.8;
 mutationProbability = 0.025;
 tournamentSelectionParameter = 0.75;
-variableRange = 3.0;
+tournamentSize = 5;
+nbrOfCopies = 2;
+variableRange = 5.0;
 numberOfGenerations = 100;
 fitness = zeros(populationSize,1);
 
@@ -47,17 +49,16 @@ population = InitializePopulation(populationSize, numberOfGenes);
 
 for iGeneration = 1:numberOfGenerations
 
-    maximumFitness = 0.0; % Assume non-negative fitnes values
+    maximumFitness = 0.0; % Assume non-negative fitness values
     xBest = zeros(1,2);
-    bestIndividualIndex = 0;
     for i = 1:populationSize
         chromosome = population(i,:);
-        x = DecodeChromosome(chromosome, variableRange);
+        x = DecodeChromosome(chromosome, 2, variableRange);
         decodedPopulation(i,:) = x;
         fitness(i) = EvaluateIndividual(x);
         if fitness(i) > maximumFitness
             maximumFitness = fitness(i);
-            bestIndividualIndex = i;
+            bestChromosome = population(i,:);
             xBest = x;
         end
     end
@@ -72,8 +73,8 @@ for iGeneration = 1:numberOfGenerations
     tempPopulation = population;
 
     for i = 1:2:populationSize
-        i1 = TournamentSelect(fitness, tournamentSelectionParameter);
-        i2 = TournamentSelect(fitness, tournamentSelectionParameter);
+        i1 = TournamentSelect(fitness, tournamentSelectionParameter, tournamentSize);
+        i2 = TournamentSelect(fitness, tournamentSelectionParameter, tournamentSize);
         chromosome1 = population(i1,:);
         chromosome2 = population(i2,:);
 
@@ -94,8 +95,7 @@ for iGeneration = 1:numberOfGenerations
         tempPopulation(i,:) = mutatedChromosome;
     end
 
-    tempPopulation(1,:) = population(bestIndividualIndex, :);
-    population = tempPopulation;
+    population = InsertBestIndividual(tempPopulation, bestChromosome, nbrOfCopies);
 
  plotvector = get(bestPlotHandle, 'YData');
  plotvector(iGeneration) = maximumFitness;
