@@ -1,11 +1,11 @@
-clear all
-populationSize = 50;
-numberOfGenes = 30;
-crossOverProbability = 0.8;
-mutationProbability = 0.025;
-tournamentSelectionParameter = 0.75;
-tournamentSize = 5;
-nbrOfCopies = 2;
+close all
+populationSize = 400;
+numberOfGenes = 60;
+crossOverProbability = 0.85;
+mutationProbability = 1/60;
+tournamentSelectionParameter = 0.8;
+tournamentSize = 2;
+nbrOfCopies = 1;
 variableRange = 5.0;
 numberOfGenerations = 100;
 fitness = zeros(populationSize,1);
@@ -62,13 +62,7 @@ for iGeneration = 1:numberOfGenerations
             xBest = x;
         end
     end
-
-    % printout
-    disp('xBest')
-    disp(xBest)
-    disp('maximumFitness')
-    disp(maximumFitness)
-    
+  
     
     tempPopulation = population;
 
@@ -106,8 +100,8 @@ for iGeneration = 1:numberOfGenerations
  drawnow;
 end %Loop over genertions
 
-disp('xBest')
-disp(xBest)
 
-disp('maximumFitness')
-disp(maximumFitness)
+disp('Minimum found at x = ')
+disp(xBest)
+disp('Function value f(x) = ')
+disp(1/maximumFitness)
