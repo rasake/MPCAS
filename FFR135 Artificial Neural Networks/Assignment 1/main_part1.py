@@ -8,17 +8,8 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 import hopfield as hf
+import pattern_utilities
 
-
-def create_random_pattern(pattern_length):
-    temp_lst = [np.sign(2*(np.random.rand()-0.5)) for x in range(pattern_length)] 
-    return np.reshape(np.array(temp_lst), [pattern_length, 1])
-    
-def store_random_patterns(hopfield_network, nbr_of_patterns):
-    patterns = [create_random_pattern(hopfield_network._NBR_OF_CELLS) for x in range(nbr_of_patterns)]
-    for pattern_i in patterns:
-        hopfield_network.store_pattern(pattern_i)
-    return patterns
 
 def test_stored_patterns(hopfield_network, stored_patterns):
     one_step_errors = 0
@@ -33,7 +24,7 @@ def simulate_one_step_error_prob(pattern_length, nbr_of_patterns):
     prob_list = np.zeros(nbr_of_cycles)
     for i in range(nbr_of_cycles):
         hopfield_network = hf.HopfieldNetwork(pattern_length)
-        stored_patterns = store_random_patterns(hopfield_network, nbr_of_patterns)
+        stored_patterns = pattern_utilities.store_random_patterns(hopfield_network, nbr_of_patterns)
         prob_list[i] = test_stored_patterns(hopfield_network, stored_patterns)  
     return np.mean(prob_list)
 
