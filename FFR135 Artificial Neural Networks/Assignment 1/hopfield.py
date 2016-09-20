@@ -8,7 +8,9 @@ import numpy as np
 import scipy.special
 
 def logistic_function(x, beta):
-    return scipy.special.expit(x*beta)
+    return scipy.special.expit(2*x*beta)
+    
+
 class HopfieldNetwork:
     def __init__(self, nbr_of_cells, initial_pattern = None, initial_weights = None):
         if initial_pattern is None:
@@ -65,7 +67,7 @@ class HopfieldNetwork:
         if len(pattern_vector) != self._NBR_OF_CELLS:
             raise ValueError("Pattern length must match number of neurons")
         temp_weights = pattern_vector @ np.transpose(pattern_vector) / self._NBR_OF_CELLS
-        np.fill_diagonal(temp_weights,0)       
+        np.fill_diagonal(temp_weights,0)    
         self.weights += temp_weights
 
 
@@ -79,7 +81,8 @@ class HopfieldNetwork:
             self.neuron_state_vector = new_state
         else: #Asynchronous updating, only one bit will change
             index = np.random.randint(0, self._NBR_OF_CELLS) #Start inclusive, stop exclusive
-            local_field = self.weights[index] @ self.neuron_state_vector                        
+            local_field = (self.weights[index] @ self.neuron_state_vector ) [0]
+
             if stochastic:
                 if np.random.rand() < logistic_function(local_field, beta):
                     new_neuron_value = 1
