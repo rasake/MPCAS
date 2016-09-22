@@ -55,14 +55,14 @@ def simulate_order_parameter(nbr_of_neurons, nbr_of_patterns, beta, nbr_of_data_
     
    
 def make_curve(beta, path = None):
-    nbr_of_neurons = 500
+    nbr_of_neurons = 25
     
     p_lst = [11,30]
     m1_means = np.zeros(len(p_lst))
     m1_upper = np.zeros(len(p_lst))
     m1_lower = np.zeros(len(p_lst))
     alphas = np.zeros(len(p_lst))
-
+    
     for index, p in enumerate(p_lst):
  
         results = simulate_order_parameter(nbr_of_neurons, p, beta, 10, 1e4)
@@ -74,7 +74,7 @@ def make_curve(beta, path = None):
         m1_upper[index] = mean + std
         m1_lower[index] = mean - std
     
-    dic = {"Alpha": alphas, "Average_m1": m1_means, "Upper": m1_upper, "Lower": m1_lower}
+    dic = {"Alpha": alphas, "Average_m1": m1_means, "Upper": m1_upper, "Lower": m1_lower, "p":p_lst}
     df = pd.DataFrame(dic)
     if path != None:
         df.to_csv(path)
@@ -95,7 +95,7 @@ def plot_results(df, save_path, df_path = None):
     
     
 if __name__ == '__main__':
-    save_path = r'C:\Users\Rasmus\Documents\plot.png'
+    save_path = r'C:\Users\Rasmus\Documents\plotb.png'
     df_path = r'C:\Users\Rasmus\Documents\assgn1_3a.txt'
     df = make_curve(2, df_path)
     plot_results(df, save_path)
