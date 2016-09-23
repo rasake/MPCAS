@@ -92,10 +92,29 @@ def plot_results(df, save_path, df_path = None):
     plt.title("Simulation results for the Steady-State Order Parameter")
     plt.savefig(save_path, dpi = 800)
     
-    
+def multiplot(df_lst, save_path):
+    legend = []
+    for df in df_lst:
+        plt.plot(df.Alpha,df.Average_m1)
+        legend.append(str(df.p.iloc[-1]) + " patterns")
+    plt.legend(legend)
+    plt.xlabel('Alpha')
+    plt.ylabel('m1')
+    plt.title("Simulation results for the Steady-State Order Parameter")
+    plt.show()
+    #plt.savefig(save_path, dpi = 800)
+
+def plot_from_files():
+    df50 = pd.read_csv(r'C:\Users\Rasmus\p50.txt')
+    df100 = pd.read_csv(r'C:\Users\Rasmus\p100.txt')
+    df250 = pd.read_csv(r'C:\Users\Rasmus\p250.txt')
+    df500 = pd.read_csv(r'C:\Users\Rasmus\p500.txt')
+    df_lst = [df50, df100, df250, df500]
+    multiplot(df_lst, r'C:\Users\Rasmus\multiplot.png')
     
 if __name__ == '__main__':
-    save_path = r'C:\Users\Rasmus\Documents\plotb.png'
-    df_path = r'C:\Users\Rasmus\Documents\assgn1_3a.txt'
-    df = make_curve(2, df_path)
-    plot_results(df, save_path)
+    #save_path = r'C:\Users\Rasmus\Documents\plotb.png'
+    #df_path = r'C:\Users\Rasmus\Documents\assgn1_3a.txt'
+    #df = make_curve(2, df_path)
+    #plot_results(df, save_path)
+    plot_from_files()
