@@ -93,9 +93,12 @@ def plot_results(df, save_path, df_path = None):
     plt.savefig(save_path, dpi = 800)
     
 def multiplot(df_lst, save_path):
+    sns.set_style('white')
     legend = []
-    for df in df_lst:
-        plt.plot(df.Alpha,df.Average_m1)
+    for index, df in enumerate(df_lst):
+        color_i = sns.color_palette()[index]
+        plt.plot(df.Alpha,df.Average_m1, c = color_i)
+        plt.fill_between(df.Alpha, df.Lower,df.Upper, facecolor = color_i, alpha = '0.15')
         legend.append(str(df.p.iloc[-1]) + " patterns")
     plt.legend(legend)
     plt.xlabel('Alpha')
@@ -105,12 +108,12 @@ def multiplot(df_lst, save_path):
     #plt.savefig(save_path, dpi = 800)
 
 def plot_from_files():
-    df50 = pd.read_csv(r'C:\Users\Rasmus\p50.txt')
-    df100 = pd.read_csv(r'C:\Users\Rasmus\p100.txt')
-    df250 = pd.read_csv(r'C:\Users\Rasmus\p250.txt')
-    df500 = pd.read_csv(r'C:\Users\Rasmus\p500.txt')
+    df50 = pd.read_csv(r'C:\Users\Rasmus\ANN\p50.txt')
+    df100 = pd.read_csv(r'C:\Users\Rasmus\ANN\p100.txt')
+    df250 = pd.read_csv(r'C:\Users\Rasmus\ANN\p250.txt')
+    df500 = pd.read_csv(r'C:\Users\Rasmus\ANN\p500.txt')
     df_lst = [df50, df100, df250, df500]
-    multiplot(df_lst, r'C:\Users\Rasmus\multiplot.png')
+    multiplot(df_lst, r'C:\Users\Rasmus\ANN\multiplot.png')
     
 if __name__ == '__main__':
     #save_path = r'C:\Users\Rasmus\Documents\plotb.png'
