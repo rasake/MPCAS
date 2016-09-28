@@ -85,8 +85,8 @@ def train_network(network, learning_rate, df_tr, df_val, nbr_iterations, nbr_err
 def single_trial_a(input_lst):
     [save_folder, df_tr, df_val, trial_id] = input_lst
 
-    nbr_iterations = 1e3
-    nbr_errors = 30
+    nbr_iterations = 2e5
+    nbr_errors = 1000
     learning_rate = 0.01
     beta = 0.5
     
@@ -101,6 +101,40 @@ def single_trial_a(input_lst):
     
     return min(tr_error), min(val_error)
 
+
+def main_a():
+    meta_save_folder = 'C:\\Users\\Rasmus\\ANN'
+    tr_path = 'C:\\Users\\Rasmus\\Desktop\\train_data_2016.txt'
+    val_path =  'C:\\Users\\Rasmus\\Desktop\\valid_data_2016.txt'
+    nbr_trials = 100 #100 in assngment
+       
+    if not os.path.isdir(meta_save_folder):
+        raise ValueError('Save folder ' + meta_save_folder + ' is not a directory.')
+    save_folder = os.path.join(meta_save_folder, 'Assgnm4a')
+    os.mkdir(save_folder)
+
+    df_tr, df_val = load_and_normalize(tr_path, val_path)    
+    silly_lst = [[save_folder, df_tr, df_val, 'trial_' + str(i)] for i in range(nbr_trials)]   
+    pool = Pool(processes=4)     # start 4 worker processes
+    results = [x for x in pool.imap_unordered(single_trial_a, silly_lst)]
+    pool.close()
+
+    mean_min_tr_error = np.mean([x[0] for x in results])
+    mean_min_val_error = np.mean([x[1] for x in results])
+
+    file_path = os.path.join(save_folder, 'Averages.txt')
+
+    with open(file_path, 'w') as output_file:
+        output_file.write("Average of minimum training error: " + str(mean_min_tr_error) + "\n")
+        output_file.write("Average of minimum validation error: " + str(mean_min_val_error) + "\n")
+    
+    print("Average of minimum training error: " + str(mean_min_tr_error))
+    print("Average of minimum training error: " + str(mean_min_val_error))
+    
+ 
+    return results
+
+
 def simple_plot():
     meta_save_folder = 'C:\\Users\\Rasmus\\ANN'
     save_folder = os.path.join(meta_save_folder, 'Assgnm4a')
@@ -111,30 +145,7 @@ def simple_plot():
     plt.show()
 
 
-def main_a():
-    meta_save_folder = 'C:\\Users\\Rasmus\\ANN'
-    tr_path = 'C:\\Users\\Rasmus\\Desktop\\train_data_2016.txt'
-    val_path =  'C:\\Users\\Rasmus\\Desktop\\valid_data_2016.txt'
-    nbr_trials = 4 #100 in assngment
     
-    
-    if not os.path.isdir(meta_save_folder):
-        raise ValueError('Save folder ' + meta_save_folder + ' is not a directory.')
-    save_folder = os.path.join(meta_save_folder, 'Assgnm4a')
-    os.mkdir(save_folder)
-
-    
-    df_tr, df_val = load_and_normalize(tr_path, val_path)    
-    silly_lst = [[save_folder, df_tr, df_val, 'trial_' + str(i)] for i in range(nbr_trials)]   
-    pool = Pool(processes=4)     # start 4 worker processes
-    results = [x for x in pool.imap_unordered(single_trial_a, silly_lst)]
-    pool.close()
-
-    return results
-
-   
-
-
 if __name__ == '__main__':
     results = main_a()
     simple_plot()
