@@ -35,8 +35,8 @@ class MultilayerNetwork():
         for i in range(self.nbr_of_layers-1):
             nbr_inputs = size_spec[i]
             nbr_outputs = size_spec[i+1]            
-            self._weight_matrices[i] = random_matrix(nbr_outputs, nbr_inputs)
-            self._threshold_vectors[i] = random_column_vector(nbr_outputs) * 0.2
+            self._weight_matrices[i] = random_matrix(nbr_outputs, nbr_inputs) * 0.2
+            self._threshold_vectors[i] = random_column_vector(nbr_outputs)
 
     @property
     def size_spec(self):
@@ -73,23 +73,22 @@ class MultilayerNetwork():
     def propogate_back(self, expected_output, learning_rate):
         deltas = [None for x in range(self.nbr_of_layers-1)]
         tmp_weights = self.weight_matrices
+        tmp_thresholds = self.threshold_vectors
 
         deltas[-1] = expected_output - self.neuron_vectors[-1]
-        tmp_weights[-1] = learning_rate * deltas[-1] @ np.transpose(self._neuron_vectors[-2])
+        tmp_weights[-1] += learning_rate * deltas[-1] @ np.transpose(self._neuron_vectors[-2])
+        tmp_thresholds[-1] += np.reshape(-learning_rate * deltas[-1], [1,1])
         for l in range(self.nbr_of_layers-3,-1,-1): # loop backwards to calculate errors
             g_prime_b = self.g_prime(self._local_field_vectors[l])
             tmp = np.transpose(self._weight_matrices[l+1]) @ deltas[l+1]
             deltas[l] = np.reshape([tmp[i]*g_prime_b[i] for i in range(len(tmp))], [len(tmp), 1])
-            delta_w = learning_rate * deltas[l] @ np.transpose(self._neuron_vectors[l])
-            tmp_weights[l] += delta_w
+            tmp_weights[l] += learning_rate * deltas[l] @ np.transpose(self._neuron_vectors[l])
+            tmp_thresholds[l] += -learning_rate * deltas[l]
+            
         
         self._weight_matrices = tmp_weights
-        return deltas
+        self._threshold_vectors = tmp_thresholds
             
-    
-    
-    
-    
     
     
     def __str__(self):
@@ -117,17 +116,5 @@ class MultilayerNetwork():
                 tmp += " to layer " + str(index+1) + ": \n"
                 tmp += str(vector) + " \n"
         return tmp + "--------"
-
-
-if __name__ == '__main__':
-    network = MultilayerNetwork([2,3,5,4], 3)
-#    print(network)
-    print(network.feed_forward(random_column_vector(2)))
-    print("\n ========== \n")
-    print(network.weights2str())   
-    deltas = network.propogate_back(random_column_vector(4), 0.3)
-    print(network.weights2str())
-
-    
 
     
