@@ -138,16 +138,16 @@ def main_a():
 
 
 def single_trial_b(input_lst):
-    [save_folder, df_tr, df_val, trial_id] = input_lst
+    [save_folder, df_tr, df_val, trial_id, nbr_hidden_layers] = input_lst
 
-    nbr_iterations = 1e5
-    nbr_errors = 100
+    nbr_iterations = 1e2
+    nbr_errors = 10
     learning_rate = 0.01
     beta = 0.5
     
     save_path = os.path.join(save_folder, str(trial_id) + '.txt')
 
-    network = MultilayerNetwork([2,2,1], beta) #Try 2,4,6,8,32 neurons in hidden layer
+    network = MultilayerNetwork([2,nbr_hidden_layers,1], beta) #Try 2,4,6,8,32 neurons in hidden layer
     tr_error, val_error = train_network(network, learning_rate, df_tr, df_val, nbr_iterations, nbr_errors)
     
     tmp_dict = {'tr_error': tr_error, 'val_error': val_error}
@@ -159,7 +159,7 @@ def single_trial_b(input_lst):
 
 
 
-def main_b():
+def main_b(nbr_hidden_layers):
     meta_save_folder = 'C:\\Users\\Rasmus\\ANN'
     tr_path = 'C:\\Users\\Rasmus\\Desktop\\train_data_2016.txt'
     val_path =  'C:\\Users\\Rasmus\\Desktop\\valid_data_2016.txt'
@@ -167,11 +167,11 @@ def main_b():
        
     if not os.path.isdir(meta_save_folder):
         raise ValueError('Save folder ' + meta_save_folder + ' is not a directory.')
-    save_folder = os.path.join(meta_save_folder, 'Assgnm4b')
+    save_folder = os.path.join(meta_save_folder, 'Assgnm4b_' + str(nbr_hidden_layers) + '_hidden_layers')
     os.mkdir(save_folder)
 
     df_tr, df_val = load_and_normalize(tr_path, val_path)    
-    silly_lst = [[save_folder, df_tr, df_val, 'trial_' + str(i)] for i in range(nbr_trials)]   
+    silly_lst = [[save_folder, df_tr, df_val, 'trial_' + str(i), nbr_hidden_layers] for i in range(nbr_trials)]   
     pool = Pool(processes=4)     # start 4 worker processes
     results = [x for x in pool.imap_unordered(single_trial_b, silly_lst)]
     pool.close()
@@ -205,8 +205,9 @@ def simple_plot():
 
     
 if __name__ == '__main__':
-    results = main_b()
-    simple_plot()
+    results = main_b(2)
+    results = main_b(4)    
+#    simple_plot()
 #    results = main_b()
 #    meta_save_folder = 'C:\\Users\\Rasmus\\ANN'
 #    save_folder = os.path.join(meta_save_folder, 'Assgnm4a')
