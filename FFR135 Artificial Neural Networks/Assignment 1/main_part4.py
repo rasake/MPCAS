@@ -92,7 +92,7 @@ def single_trial_a(input_lst):
     
     save_path = os.path.join(save_folder, str(trial_id) + '.txt')
 
-    network = MultilayerNetwork([2,1,1], beta)
+    network = MultilayerNetwork([2,1], beta)
     tr_error, val_error = train_network(network, learning_rate, df_tr, df_val, nbr_iterations, nbr_errors)
     
     tmp_dict = {'tr_error': tr_error, 'val_error': val_error}
@@ -135,9 +135,67 @@ def main_a():
     return results
 
 
+
+
+def single_trial_b(input_lst):
+    [save_folder, df_tr, df_val, trial_id] = input_lst
+
+    nbr_iterations = 1e5
+    nbr_errors = 100
+    learning_rate = 0.01
+    beta = 0.5
+    
+    save_path = os.path.join(save_folder, str(trial_id) + '.txt')
+
+    network = MultilayerNetwork([2,2,1], beta) #Try 2,4,6,8,32 neurons in hidden layer
+    tr_error, val_error = train_network(network, learning_rate, df_tr, df_val, nbr_iterations, nbr_errors)
+    
+    tmp_dict = {'tr_error': tr_error, 'val_error': val_error}
+    df = pd.DataFrame(tmp_dict)
+    df.to_csv(save_path)
+    
+    return min(tr_error), min(val_error)
+
+
+
+
+def main_b():
+    meta_save_folder = 'C:\\Users\\Rasmus\\ANN'
+    tr_path = 'C:\\Users\\Rasmus\\Desktop\\train_data_2016.txt'
+    val_path =  'C:\\Users\\Rasmus\\Desktop\\valid_data_2016.txt'
+    nbr_trials = 4 #100 in assngment
+       
+    if not os.path.isdir(meta_save_folder):
+        raise ValueError('Save folder ' + meta_save_folder + ' is not a directory.')
+    save_folder = os.path.join(meta_save_folder, 'Assgnm4b')
+    os.mkdir(save_folder)
+
+    df_tr, df_val = load_and_normalize(tr_path, val_path)    
+    silly_lst = [[save_folder, df_tr, df_val, 'trial_' + str(i)] for i in range(nbr_trials)]   
+    pool = Pool(processes=4)     # start 4 worker processes
+    results = [x for x in pool.imap_unordered(single_trial_b, silly_lst)]
+    pool.close()
+
+    mean_min_tr_error = np.mean([x[0] for x in results])
+    mean_min_val_error = np.mean([x[1] for x in results])
+
+    file_path = os.path.join(save_folder, 'Averages.txt')
+
+    with open(file_path, 'w') as output_file:
+        output_file.write("Average of minimum training error: " + str(mean_min_tr_error) + "\n")
+        output_file.write("Average of minimum validation error: " + str(mean_min_val_error) + "\n")
+    
+    print("Average of minimum training error: " + str(mean_min_tr_error))
+    print("Average of minimum training error: " + str(mean_min_val_error))
+    
+ 
+    return results
+
+
+
 def simple_plot():
     meta_save_folder = 'C:\\Users\\Rasmus\\ANN'
-    save_folder = os.path.join(meta_save_folder, 'Assgnm4a')
+    save_folder = os.path.join(meta_save_folder, 'Assgnm4b')
     for i in range(4):
         path_i = os.path.join(save_folder, 'trial_' + str(i) + '.txt')
         df_i = pd.read_csv(path_i)
@@ -147,12 +205,16 @@ def simple_plot():
 
     
 if __name__ == '__main__':
-    results = main_a()
+    results = main_b()
     simple_plot()
-    
-   
-
-    
-    
+#    results = main_b()
+#    meta_save_folder = 'C:\\Users\\Rasmus\\ANN'
+#    save_folder = os.path.join(meta_save_folder, 'Assgnm4a')
+#    single_trial_b(input_lst):
+#    [save_folder, df_tr, df_val, trial_id] = input_lst
+#
+#
+#    
+#    
 
     
