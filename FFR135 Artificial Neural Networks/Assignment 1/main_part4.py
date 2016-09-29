@@ -18,6 +18,27 @@ def load_and_normalize(train_path, validation_path):
     df_val = pd.read_csv(validation_path, header = None, delim_whitespace=True, names = ['xi_1', 'xi_2', 'zeta'])
 
     big_df = pd.concat([df_tr, df_val])
+    xi = []
+    for i in range(len(big_df*2)):
+        xi.append(big_df.xi_1.iloc[i])
+        xi.append(big_df.xi_2.iloc[i])
+    xi_mean = np.mean(xi)
+    xi_std = np.std(xi)
+    df_tr.xi_1 = (df_tr.xi_1 - xi_mean)/xi_std
+    df_tr.xi_2 = (df_tr.xi_2 - xi_mean)/xi_std
+
+    df_val.xi_1 = (df_val.xi_1 - xi_mean)/xi_std
+    df_val.xi_2 = (df_val.xi_2 - xi_mean)/xi_std
+
+    big_df = pd.concat([df_tr, df_val])  
+
+    return df_tr, df_val
+
+def load_and_normalize_old(train_path, validation_path):
+    df_tr = pd.read_csv(train_path, header = None, delim_whitespace=True, names = ['xi_1', 'xi_2', 'zeta'])
+    df_val = pd.read_csv(validation_path, header = None, delim_whitespace=True, names = ['xi_1', 'xi_2', 'zeta'])
+
+    big_df = pd.concat([df_tr, df_val])
     xi_1_mean = big_df.xi_1.mean()
     xi_1_std = big_df.xi_1.std()
     xi_2_mean = big_df.xi_2.mean()
@@ -29,18 +50,9 @@ def load_and_normalize(train_path, validation_path):
     df_val.xi_1 = (df_val.xi_1 - xi_1_mean)/xi_1_std
     df_val.xi_2 = (df_val.xi_2 - xi_2_mean)/xi_2_std
 
-    big_df = pd.concat([df_tr, df_val])
-    
-    df_val.to_csv
-#    print(big_df.xi_1.mean())
-#    print(big_df.xi_2.mean())
-#    print(big_df.xi_1.std())
-#    print(big_df.xi_2.std())    
-#
-#    
+    big_df = pd.concat([df_tr, df_val])  
 
     return df_tr, df_val
-
 
 def draw_observation(df):
     r_index = np.random.randint(0, len(df)) #low inclusive, high exclusive
@@ -140,8 +152,8 @@ def main_a():
 def single_trial_b(input_lst):
     [save_folder, df_tr, df_val, trial_id, nbr_hidden_layers] = input_lst
 
-    nbr_iterations = 1e2
-    nbr_errors = 10
+    nbr_iterations = 2e5
+    nbr_errors = 1000
     learning_rate = 0.01
     beta = 0.5
     
@@ -163,7 +175,7 @@ def main_b(nbr_hidden_layers):
     meta_save_folder = 'C:\\Users\\Rasmus\\ANN'
     tr_path = 'C:\\Users\\Rasmus\\Desktop\\train_data_2016.txt'
     val_path =  'C:\\Users\\Rasmus\\Desktop\\valid_data_2016.txt'
-    nbr_trials = 4 #100 in assngment
+    nbr_trials = 100 #100 in assngment
        
     if not os.path.isdir(meta_save_folder):
         raise ValueError('Save folder ' + meta_save_folder + ' is not a directory.')
@@ -202,10 +214,9 @@ def simple_plot():
         plt.plot(df_i.tr_error)
     plt.show()
 
-
     
 if __name__ == '__main__':
-    results = main_b(2)
+    #results = main_b(2)
     results = main_b(4)    
 #    simple_plot()
 #    results = main_b()
