@@ -9,32 +9,13 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from multiprocessing import Pool
-
+#import seaborn as sns
 
 from feed_forward_network import MultilayerNetwork
 
+
+
 def load_and_normalize(train_path, validation_path):
-    df_tr = pd.read_csv(train_path, header = None, delim_whitespace=True, names = ['xi_1', 'xi_2', 'zeta'])
-    df_val = pd.read_csv(validation_path, header = None, delim_whitespace=True, names = ['xi_1', 'xi_2', 'zeta'])
-
-    big_df = pd.concat([df_tr, df_val])
-    xi = []
-    for i in range(len(big_df*2)):
-        xi.append(big_df.xi_1.iloc[i])
-        xi.append(big_df.xi_2.iloc[i])
-    xi_mean = np.mean(xi)
-    xi_std = np.std(xi)
-    df_tr.xi_1 = (df_tr.xi_1 - xi_mean)/xi_std
-    df_tr.xi_2 = (df_tr.xi_2 - xi_mean)/xi_std
-
-    df_val.xi_1 = (df_val.xi_1 - xi_mean)/xi_std
-    df_val.xi_2 = (df_val.xi_2 - xi_mean)/xi_std
-
-    big_df = pd.concat([df_tr, df_val])  
-
-    return df_tr, df_val
-
-def load_and_normalize_old(train_path, validation_path):
     df_tr = pd.read_csv(train_path, header = None, delim_whitespace=True, names = ['xi_1', 'xi_2', 'zeta'])
     df_val = pd.read_csv(validation_path, header = None, delim_whitespace=True, names = ['xi_1', 'xi_2', 'zeta'])
 
@@ -153,7 +134,7 @@ def single_trial_b(input_lst):
     [save_folder, df_tr, df_val, trial_id, nbr_hidden_layers] = input_lst
 
     nbr_iterations = 2e5
-    nbr_errors = 1000
+    nbr_errors = 500
     learning_rate = 0.01
     beta = 0.5
     
@@ -175,7 +156,7 @@ def main_b(nbr_hidden_layers):
     meta_save_folder = 'C:\\Users\\Rasmus\\ANN'
     tr_path = 'C:\\Users\\Rasmus\\Desktop\\train_data_2016.txt'
     val_path =  'C:\\Users\\Rasmus\\Desktop\\valid_data_2016.txt'
-    nbr_trials = 100 #100 in assngment
+    nbr_trials = 25 #100 in assngment
        
     if not os.path.isdir(meta_save_folder):
         raise ValueError('Save folder ' + meta_save_folder + ' is not a directory.')
@@ -184,7 +165,7 @@ def main_b(nbr_hidden_layers):
 
     df_tr, df_val = load_and_normalize(tr_path, val_path)    
     silly_lst = [[save_folder, df_tr, df_val, 'trial_' + str(i), nbr_hidden_layers] for i in range(nbr_trials)]   
-    pool = Pool(processes=4)     # start 4 worker processes
+    pool = Pool(processes=3)     # start 4 worker processes
     results = [x for x in pool.imap_unordered(single_trial_b, silly_lst)]
     pool.close()
 
@@ -198,7 +179,7 @@ def main_b(nbr_hidden_layers):
         output_file.write("Average of minimum validation error: " + str(mean_min_val_error) + "\n")
     
     print("Average of minimum training error: " + str(mean_min_tr_error))
-    print("Average of minimum training error: " + str(mean_min_val_error))
+    print("Average of validation training error: " + str(mean_min_val_error))
     
  
     return results
@@ -214,19 +195,50 @@ def simple_plot():
         plt.plot(df_i.tr_error)
     plt.show()
 
+def separate_df(df):
+    xi_1_red = []
+    xi_2_red = []
+    xi_1_blue = []
+    xi_2_blue = []
+    for i in range(len(df)):
+        xi1 = df.iloc[i].xi_1
+        xi2 = df.iloc[i].xi_2
+        zeta = df.iloc[i].zeta
+        if zeta == -1:
+            xi_1_red.append(xi1)
+            xi_2_red.append(xi2)
+        else:
+            xi_1_blue.append(xi1)
+            xi_2_blue.append(xi2)
+    return [xi_1_red, xi_2_red],[xi_1_blue, xi_2_blue] 
+
+    
+def visualize_raw_data():    
+    tr_path = 'C:\\Users\\Rasmus\\Desktop\\train_data_2016.txt'
+    val_path =  'C:\\Users\\Rasmus\\Desktop\\valid_data_2016.txt'
+    df_tr, df_val = load_and_normalize(tr_path, val_path)    
+    #sns.set_style('white')
+    fig = plt.figure()
+    ax = plt.subplot(111)
+    [xi_1_red, xi_2_red],[xi_1_blue, xi_2_blue] = separate_df(df_tr)
+    plt.plot(xi_1_red, xi_2_red, 'ro', label = "Training points \n with zeta=-1")
+    plt.plot(xi_1_blue, xi_2_blue, 'go', label = "Training points \n with zeta=1")
+    [xi_1_red, xi_2_red],[xi_1_blue, xi_2_blue] = separate_df(df_val)
+    plt.plot(xi_1_red, xi_2_red, 'bo', label = "Validation points \n with zeta=-1")
+    plt.plot(xi_1_blue, xi_2_blue, 'co', label = "Validation points \n with zeta=1")    
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height * 0.96])
+    legend = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    plt.setp(legend.get_title(),fontsize='15')
+    plt.xlabel("xi_1")
+    plt.ylabel("xi_2")
+
+    plt.savefig('C:\\Users\\Rasmus\\Desktop\\raw_data_viz', dpi = 400)  
+
     
 if __name__ == '__main__':
-    #results = main_b(2)
-    results = main_b(4)    
-#    simple_plot()
+#    results = main_b(2)
+#    results = main_b(4)    
 #    results = main_b()
-#    meta_save_folder = 'C:\\Users\\Rasmus\\ANN'
-#    save_folder = os.path.join(meta_save_folder, 'Assgnm4a')
-#    single_trial_b(input_lst):
-#    [save_folder, df_tr, df_val, trial_id] = input_lst
-#
-#
-#    
-#    
-
+    visualize_raw_data()
     
