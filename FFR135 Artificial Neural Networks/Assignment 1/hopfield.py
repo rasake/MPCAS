@@ -5,6 +5,11 @@ Created on Mon Sep  5 12:23:28 2016
 @author: Rasmus
 """
 import numpy as np
+import scipy.special
+
+def logistic_function(x, beta):
+    return scipy.special.expit(2*x*beta)
+    
 
 class HopfieldNetwork:
     def __init__(self, nbr_of_cells, initial_pattern = None, initial_weights = None):
@@ -62,25 +67,36 @@ class HopfieldNetwork:
         if len(pattern_vector) != self._NBR_OF_CELLS:
             raise ValueError("Pattern length must match number of neurons")
         temp_weights = pattern_vector @ np.transpose(pattern_vector) / self._NBR_OF_CELLS
-        np.fill_diagonal(temp_weights,0)       
+        np.fill_diagonal(temp_weights,0)    
         self.weights += temp_weights
 
 
-    def update_state(self, synchronous = True):
+    def update_state(self, synchronous = True, stochastic = False, beta = 0):
+        if synchronous and stochastic:
+            raise ValueError("Stochastic updating cannot be synchronized," +
+                "please set synchronous kwarg to False to allow stochastic updating")
         if synchronous: #Synchronous updating, all bits updated at once in parallell
             new_state = np.sign(self._weights @ self._neuron_state_vector)
             is_done = np.array_equal(self.neuron_state_vector, new_state)
             self.neuron_state_vector = new_state
         else: #Asynchronous updating, only one bit will change
-            r = np.random.randint(0, self._NBR_OF_CELLS) #Start inclusive, stop exclusive
-            new_neuron_value = np.sign( self.weights[r] @ self.neuron_state_vector )
-            is_flipped = (new_neuron_value != self.neuron_state_vector[r])
+            index = np.random.randint(0, self._NBR_OF_CELLS) #Start inclusive, stop exclusive
+            local_field = (self.weights[index] @ self.neuron_state_vector ) [0]
+
+            if stochastic:
+                if np.random.rand() < logistic_function(local_field, beta):
+                    new_neuron_value = 1
+                else:
+                    new_neuron_value = -1
+            else: #deterministic
+                new_neuron_value = np.sign(local_field)
+            is_flipped = (new_neuron_value != self.neuron_state_vector[index])
             if is_flipped:
                 self._pseudo_stable_bits = 0 * self._pseudo_stable_bits
             else:
-                self._pseudo_stable_bits[r] = 1
+                self._pseudo_stable_bits[index] = 1
             is_done = np.all(self._pseudo_stable_bits)
-            self.set_neuron(r, new_neuron_value)           
+            self.set_neuron(index, new_neuron_value)           
         self._updates_since_last_reset +=1
         return is_done
     
