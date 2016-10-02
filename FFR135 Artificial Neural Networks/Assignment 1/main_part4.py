@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from multiprocessing import Pool
-#import seaborn as sns
+import seaborn as sns
 
 from feed_forward_network import MultilayerNetwork
 
@@ -134,7 +134,7 @@ def single_trial_b(input_lst):
     [save_folder, df_tr, df_val, trial_id, nbr_hidden_layers] = input_lst
 
     nbr_iterations = 2e5
-    nbr_errors = 500
+    nbr_errors = 1000
     learning_rate = 0.01
     beta = 0.5
     
@@ -221,11 +221,11 @@ def visualize_raw_data():
     fig = plt.figure()
     ax = plt.subplot(111)
     [xi_1_red, xi_2_red],[xi_1_blue, xi_2_blue] = separate_df(df_tr)
-    plt.plot(xi_1_red, xi_2_red, 'ro', label = "Training points \n with zeta=-1")
-    plt.plot(xi_1_blue, xi_2_blue, 'go', label = "Training points \n with zeta=1")
+    plt.plot(xi_1_red, xi_2_red, 'ro', label = "Training points \n with output -1")
+    plt.plot(xi_1_blue, xi_2_blue, 'go', label = "Training points \n with output +1")
     [xi_1_red, xi_2_red],[xi_1_blue, xi_2_blue] = separate_df(df_val)
-    plt.plot(xi_1_red, xi_2_red, 'bo', label = "Validation points \n with zeta=-1")
-    plt.plot(xi_1_blue, xi_2_blue, 'co', label = "Validation points \n with zeta=1")    
+    plt.plot(xi_1_red, xi_2_red, 'bo', label = "Validation points \n with output -1")
+    plt.plot(xi_1_blue, xi_2_blue, 'co', label = "Validation points \n with output +1")    
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.8, box.height * 0.96])
     legend = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
@@ -233,12 +233,29 @@ def visualize_raw_data():
     plt.xlabel("xi_1")
     plt.ylabel("xi_2")
 
-    plt.savefig('C:\\Users\\Rasmus\\Desktop\\raw_data_viz', dpi = 400)  
+    plt.savefig('C:\\Users\\Rasmus\\Desktop\\raw_data_viz', dpi = 800)  
+
+def plot_4b_results():
+    # Values manually entered from the results file
+    tr_error = [0.258266666667, 0.0512, 0.0454666666667, 0.042, 0.0401333333333, 0.0394666666667]
+    val_error = [0.2548, 0.0562, 0.055, 0.057, 0.0574, 0.057]
+    x=[0,1,2,3,4,5]
+    my_xticks = ['0','2','4','8','16','32']
+    plt.xticks(x, my_xticks)    
+    plt.plot(x,tr_error, 'o')
+    plt.plot(x,val_error, 'o')
+    plt.xlim([-0.1, 5.1])
+    plt.title('Hidden layer size and Classification Error')
+    plt.legend(['Training set', 'Validation set'])
+    plt.xlabel('Number of neurons in hidden layer')
+    plt.ylabel('Average of Minimum Classification Error')
+    plt.savefig('C:\\Users\\Rasmus\\Desktop\\4b.png', dpi = 800)  
+
 
     
 if __name__ == '__main__':
 #    results = main_b(2)
 #    results = main_b(4)    
 #    results = main_b()
-    visualize_raw_data()
+    plot_4b_results()
     
