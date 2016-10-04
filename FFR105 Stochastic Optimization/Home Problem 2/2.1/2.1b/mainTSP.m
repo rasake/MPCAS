@@ -1,11 +1,11 @@
 clear all
 close all
-populationSize = 50;
-mutationProbability = 1/50;
+populationSize = 100;
+mutationProbability = 1/40;
 tournamentSelectionParameter = 0.8;
-tournamentSize = 2;
+tournamentSize = 3;
 nbrOfCopies = 1;
-numberOfGenerations = 200;
+numberOfGenerations = 1000;
 
 
 % Load City Locations
@@ -15,19 +15,12 @@ numberOfGenes = length(cityLocations);
 % Each row is a chromosome
 population = InitializePopulation(populationSize, numberOfGenes);
 
-% Vizualize starting point of algorithm
-fitness = zeros(populationSize,1);
-    for i = 1:populationSize
-        fitness(i) = EvaluateIndividual(population(i,:), cityLocations);
-    end
-[bestFitnessEver, iBestEver] = max(fitness);
-bestIndividualEver = population(iBestEver,:);
-disp('Shortest path length in initalization')
-disp(1/bestFitnessEver)
+% Set up plotting
 tspFigure = InitializeTspPlot(cityLocations,[0 20 0 20]); 
 connections = InitializeConnections(cityLocations); 
-PlotPath(connections,cityLocations,bestIndividualEver);     
 
+% Assume positive fitness values
+bestFitnessEver = 0;
 
 for iGeneration = 1:numberOfGenerations
     % Evaluation
@@ -43,7 +36,8 @@ for iGeneration = 1:numberOfGenerations
         if fitness(i) > bestFitnessEver
            bestIndividualEver = population(i,:);
            bestFitnessEver = fitness(i);
-           PlotPath(connections,cityLocations,bestIndividualEver);     
+           PlotPath(connections,cityLocations,bestIndividualEver);
+           bestGen = iGeneration;
         end
     end  
     % Generational replacement
@@ -52,3 +46,5 @@ end
 
 disp('Shortest path length')
 disp(1/bestFitnessEver)
+disp('Found in genereation')
+disp(bestGen)
