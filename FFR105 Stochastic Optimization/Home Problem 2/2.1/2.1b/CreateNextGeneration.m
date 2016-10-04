@@ -6,9 +6,9 @@ function [ newPopulation ] = CreateNextGeneration( population, fitness, tourname
 newPopulation = population;
 for k = 1:length(population)
    iSelected = TournamentSelect(fitness, tournamentSelectionParameter, tournamentSize);
-   chromosome = population(iSelected,:);
-   mutatedChromosome = Mutate(chromosome, mutationProbability);
-   newPopulation(k,:) = mutatedChromosome; 
+   kChromosome = population(iSelected,:);
+   kMutatedChromosome = Mutate(kChromosome, mutationProbability);
+   newPopulation(k,:) = kMutatedChromosome; 
 end
 
 end
