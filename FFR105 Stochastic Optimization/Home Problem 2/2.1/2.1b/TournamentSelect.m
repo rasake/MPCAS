@@ -1,6 +1,6 @@
 function [ iSelected ] = TournamentSelect( fitness, tournamentSelectionParameter, tournamentSize )
 
-populationSize = size(fitness,2);
+populationSize = size(fitness,1);
 indicesContestants = zeros(1,tournamentSize);
 fitnessContestants = zeros(1,tournamentSize);
 % Randomly Select individuals to enter the tournament
