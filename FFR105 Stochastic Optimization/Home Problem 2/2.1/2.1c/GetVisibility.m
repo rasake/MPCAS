@@ -6,9 +6,9 @@ nbrOfCities = length(cityLocations);
 visibility = zeros(nbrOfCities, nbrOfCities);
 
 for j=1:nbrOfCities
-    jLoc = cityLocations(j);
+    jLoc = cityLocations(j,:);
     for i=1:nbrOfCities
-        iLoc = cityLocations(i);
+        iLoc = cityLocations(i,:);
         ijDistance = norm(iLoc-jLoc);
         visibility(i,j) = 1/ijDistance;
     end

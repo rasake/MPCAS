@@ -3,7 +3,7 @@
 % Ant system (AS) for TSP.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+clf;
 clear all;
 clc;
 
@@ -34,8 +34,8 @@ targetPathLength = 123.0;
 range = [0 20 0 20];
 tspFigure = InitializeTspPlot(cityLocation, range);
 connection = InitializeConnections(cityLocation);
-pheromoneLevel = InitializePheromoneLevels(numberOfCities, tau0); % To do: Write the InitializePheromoneLevels
-%visibility = GetVisibility(cityLocation);                         % To do: write the GetVisibility function
+pheromoneLevel = InitializePheromoneLevels(numberOfCities, tau0);
+visibility = GetVisibility(cityLocation);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Main loop
@@ -54,8 +54,8 @@ while (minimumPathLength > targetPathLength)
  pathCollection = [];
  pathLengthCollection = [];
  for k = 1:numberOfAnts
-  path = GeneratePath(pheromoneLevel, visibility, alpha, beta);   % To do: Write the GeneratePath function (and any necessary functions called by GeneratePath).
-  pathLength = GetPathLength(path,cityLocation);                  % To do: Write the GetPathLength function
+  path = GeneratePath(pheromoneLevel, visibility, alpha, beta);
+  pathLength = GetPathLength(path,cityLocation);
   if (pathLength < minimumPathLength)
     minimumPathLength = pathLength;
     disp(sprintf('Iteration %d, ant %d: path length = %.5f',iIteration,k,minimumPathLength));
