@@ -1,20 +1,23 @@
-clear all
-clc
-populationSize = 10;
-nbrGenerations = 15;
+function [bestIndividualEver, bestFitnessEver] = LGP
+
+populationSize = 50;
+nbrGenerations = 50000;
 tournamentSelectionParameter = 0.75;
 tournamentSize = 5;
 crossOverProbability = 0.2;
-mutationProbability = 0.3;
+minMutationProbability = 0.05;
+maxMutationProbability = 0.2;
+alpha = 1.1;
+minDiversity = 0.3;
 nbrOfCopies = 1;
 
 
 % Encoding parameters
-minChromosomeLength = 3;
-maxChromosomeLength = 15;
-nbrOperators = 2;
-nbrVarRegisters = 3;
-constants = [1 -1 -10];
+minChromosomeLength = 12;
+maxChromosomeLength = 40;
+nbrOperators = 4;
+nbrVarRegisters = 4;
+constants = [1 -1];
 
 
 nbrConstRegisters = length(constants);
@@ -22,12 +25,13 @@ functionData = LoadFunctionData;
 
 
 population = InitializePopulation(populationSize,minChromosomeLength, ...
-    maxChromosomeLength, nbrOperators, nbrVarRegisters, nbrConstRegisters)
+    maxChromosomeLength, nbrOperators, nbrVarRegisters, nbrConstRegisters);
 fitness = zeros(1,populationSize);
 bestFitnessEver = 0;
+mutationProbability = minMutationProbability;
 for k=1:nbrGenerations
     %Evaluation
-    for i=1:populationSize 
+    for i=1:populationSize
         chromosome = population(i).Chromosome;
         fitness(i) = evaluateChromosome(chromosome, functionData, nbrVarRegisters, constants);
     end
@@ -40,17 +44,24 @@ for k=1:nbrGenerations
         chromosome2 = population(i2).Chromosome;
 
         if rand < crossOverProbability
-            [chromosome1, chromosme2] = Cross(chromosome1,chromosome2, 4);
+            [chromosome1, chromosome2] = Cross(chromosome1,chromosome2, 4);
         end
         
         chromosome1 = Mutate(chromosome1, mutationProbability, nbrVarRegisters, nbrConstRegisters);
         chromosome2 = Mutate(chromosome2, mutationProbability, nbrVarRegisters, nbrConstRegisters);
-        chromsome1 = LimitLength(chromosome1, maxChromosomeLength);
-        chromsome2 = LimitLength(chromosome2, maxChromosomeLength);
-        newPopulation(i1).Chromosome = chromosome1;
-        newPopulation(i2).Chromosome = chromosome2;
+        newPopulation(i1).Chromosome = LimitLength(chromosome1, maxChromosomeLength);
+        newPopulation(i2).Chromosome = LimitLength(chromosome2, maxChromosomeLength);
     end
-% TODO Elitism
+    %Adjust mutation rate
+    diversity = CalculateDiversity(newPopulation, populationSize);
+    if diversity < minDiversity && mutationProbability < maxMutationProbability
+        mutationProbability = mutationProbability*alpha;
+    else
+        mutationProbability = mutationProbability/alpha;
+    end
+        
+    end
+    %Elitism
     for i = 1:populationSize
         if fitness(i) > bestFitnessEver
            bestIndividualEver = population(i).Chromosome;
@@ -60,11 +71,3 @@ for k=1:nbrGenerations
     % Generational replacement
     population = InsertBestIndividual(newPopulation, bestIndividualEver, nbrOfCopies);    
 end
-
-
-jSelected = TournamentSelect( fitness, tournamentSelectionParameter, tournamentSize );
-kSelected = TournamentSelect( fitness, tournamentSelectionParameter, tournamentSize );
-
-
-[ch1,ch2] = Cross(population(jSelected).Chromosome, population(kSelected).Chromosome,4);
-
