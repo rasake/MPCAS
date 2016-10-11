@@ -15,8 +15,8 @@ for i = 0:nbrOfInstructions-1
 %     operand2 = masterRegisters(instruction(4));
     operator = chromosome(4*i+1);
     destinationIndex = chromosome(4*i+2);
-    operand1 = chromosome(4*i+3);
-    operand2 = chromosome(4*i+4);
+    operand1 = masterRegisters(chromosome(4*i+3));
+    operand2 = masterRegisters(chromosome(4*i+4));
     switch operator
         case 1
             result = operand1 + operand2;
