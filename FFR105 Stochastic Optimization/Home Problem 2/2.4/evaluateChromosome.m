@@ -6,8 +6,8 @@ for i = 1:nbrDataPoints
     x = functionData(i,1);
     y = functionData(i,2);
     y_hat = RunInstructions(x,chromosome,nbrVariableRegisters,constants);
-    rmsSum = rmsSum + norm(y_hat-y)^2;
+    rmsSum = rmsSum + (y_hat-y)^2;
 end
-rms = rmsSum/nbrDataPoints;
+rms = sqrt(rmsSum/nbrDataPoints);
 fitness = 1/rms;
 end
