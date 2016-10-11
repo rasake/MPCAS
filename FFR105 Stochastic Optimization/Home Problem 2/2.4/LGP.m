@@ -1,7 +1,7 @@
 function [bestIndividualEver, bestFitnessEver] = LGP
 
 populationSize = 50;
-nbrGenerations = 50000;
+nbrGenerations = 100;
 tournamentSelectionParameter = 0.75;
 tournamentSize = 5;
 crossOverProbability = 0.2;
@@ -42,7 +42,7 @@ for k=1:nbrGenerations
         i2 = TournamentSelect(fitness, tournamentSelectionParameter, tournamentSize);
         chromosome1 = population(i1).Chromosome;
         chromosome2 = population(i2).Chromosome;
-
+        
         if rand < crossOverProbability
             [chromosome1, chromosome2] = Cross(chromosome1,chromosome2, 4);
         end
@@ -54,20 +54,27 @@ for k=1:nbrGenerations
     end
     %Adjust mutation rate
     diversity = CalculateDiversity(newPopulation, populationSize);
-    if diversity < minDiversity && mutationProbability < maxMutationProbability
+    if diversity < minDiversity
         mutationProbability = mutationProbability*alpha;
     else
         mutationProbability = mutationProbability/alpha;
     end
-        
-    end
+    mutationProbability = max(mutationProbability, minMutationProbability);
+    mutationProbability = min(mutationProbability, maxMutationProbability);
+    
     %Elitism
     for i = 1:populationSize
         if fitness(i) > bestFitnessEver
-           bestIndividualEver = population(i).Chromosome;
-           bestFitnessEver = fitness(i);
+            bestIndividualEver = population(i).Chromosome;
+            bestFitnessEver = fitness(i);
+            disp('New best individual found')
+            disp(bestIndividualEver)
+            disp('with fitness')
+            disp(bestFitnessEver)
         end
-    end  
+    end
     % Generational replacement
-    population = InsertBestIndividual(newPopulation, bestIndividualEver, nbrOfCopies);    
+    population = InsertBestIndividual(newPopulation, bestIndividualEver, nbrOfCopies);
+end
+
 end

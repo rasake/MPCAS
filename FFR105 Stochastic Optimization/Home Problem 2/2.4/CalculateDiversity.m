@@ -12,9 +12,9 @@ for i = 1:populationSize-1
             if iChromosome(k) ~= jChromosome(k)
                 d = d+1;
             end
-        d = d/nGenesMin;
         end
-        D = D+d;   
+        d = d/nGenesMin;
+        D = D+d;
     end
 end
 D = 2*D/populationSize/(populationSize-1);
