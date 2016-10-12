@@ -1,7 +1,7 @@
 clear all
 clc
 close all
-% TODO Choose suitable parameters
+
 nbrOfParticles = 30;
 nbrOfGenerations = 1000;
 searchSpaceDim = 5;
@@ -24,26 +24,20 @@ bestPositionEver = positionMatrix(1,:);
 
 
 inertiaWeight = startingInertiaWeight;
-fitnessHistory = [];
 for k = 1:nbrOfGenerations
 inertiaWeight = max(inertiaWeight*beta, lowerBoundInertiaWeight);
     
-fitness = evaluateSwarmB(positionMatrix);
-bestFitnesses = evaluateSwarmB(bestPositionsMatrix);
-bestFitnessEver = evaluateSwarmB(bestPositionEver);
+functionValues = evaluateSwarmB(positionMatrix);
+functionValuesBestPositions = evaluateSwarmB(bestPositionsMatrix);
+minimum = evaluateSwarmB(bestPositionEver);
 
 % Update best positions
 for i=1:nbrOfParticles
-    if fitness(i) < bestFitnesses(i)
+    if functionValues(i) < functionValuesBestPositions(i)
         bestPositionsMatrix(i,:) = positionMatrix(i,:);
     end
-    if fitness(i) < bestFitnessEver
+    if functionValues(i) < minimum
         bestPositionEver = positionMatrix(i,:);
-        fitnessHistory = [fitnessHistory; bestFitnessEver k];
-%         disp('New bestPositionEver')
-%         disp(bestPositionEver)
-%         disp('with fitness ')
-%         disp(bestFitnessEver)
     end
 end
 
@@ -55,4 +49,8 @@ positionMatrix = positionMatrix + velocityMatrix * deltaT;
 positionMatrix = Craziness(positionMatrix, crazinessProbability, positionMin, positionMax);
 
 end
-round(bestPositionEver)
+
+disp('Best position found')
+disp(round(bestPositionEver))
+disp('with function value')
+disp(minimum)
