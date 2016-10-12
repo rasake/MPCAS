@@ -16,12 +16,11 @@ numberOfCities = length(cityLocation);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Parameters
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-numberOfAnts = numberOfCities;  % To do: Set to appropriate value.
-alpha = 1.0;        % To do: Set to appropriate value.
-beta = 3.0;         % To do: Set to appropriate value.
-rho = 0.5;          % To do: set to appropriate value.
+numberOfAnts = numberOfCities;
+alpha = 1.0;
+beta = 3.0;
+rho = 0.5;
 
-% To do: Write the GetNearestNeighbourPathLength function
 nearestNeighbourPathLength = GetNearestNeighbourPathLength(cityLocation);
 tau0 = numberOfAnts/nearestNeighbourPathLength;
 
