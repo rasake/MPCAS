@@ -1,14 +1,14 @@
-function [bestIndividualEver, bestFitnessEver] = LGP
+function [bestIndividualEver, bestFitnessEver, population, fitness] = LGP
 
-populationSize = 50;
-nbrGenerations = 100;
+populationSize = 100;
+nbrGenerations = 200;
 tournamentSelectionParameter = 0.75;
 tournamentSize = 5;
 crossOverProbability = 0.2;
-minMutationProbability = 0.05;
+minMutationProbability = 0.04;
 maxMutationProbability = 0.2;
 alpha = 1.1;
-minDiversity = 0.3;
+minDiversity = 0.45;
 nbrOfCopies = 1;
 
 
@@ -49,8 +49,8 @@ for k=1:nbrGenerations
         
         chromosome1 = Mutate(chromosome1, mutationProbability, nbrVarRegisters, nbrConstRegisters);
         chromosome2 = Mutate(chromosome2, mutationProbability, nbrVarRegisters, nbrConstRegisters);
-        newPopulation(i1).Chromosome = LimitLength(chromosome1, maxChromosomeLength);
-        newPopulation(i2).Chromosome = LimitLength(chromosome2, maxChromosomeLength);
+        newPopulation(i).Chromosome = LimitLength(chromosome1, maxChromosomeLength);
+        newPopulation(2*i).Chromosome = LimitLength(chromosome2, maxChromosomeLength);
     end
     %Adjust mutation rate
     diversity = CalculateDiversity(newPopulation, populationSize);
