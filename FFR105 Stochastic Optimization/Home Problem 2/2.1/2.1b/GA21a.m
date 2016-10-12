@@ -1,9 +1,9 @@
 clear all
 close all
 populationSize = 100;
-mutationProbability = 1/40;
+mutationProbability = 1/50;
 tournamentSelectionParameter = 0.8;
-tournamentSize = populationSize*0.2;
+tournamentSize = 3;
 nbrOfCopies = 1;
 numberOfGenerations = 1000;
 

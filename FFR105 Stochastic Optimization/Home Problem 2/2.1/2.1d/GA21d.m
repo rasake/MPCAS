@@ -5,7 +5,7 @@ mutationProbability = 1/50;
 tournamentSelectionParameter = 0.8;
 tournamentSize = 3;
 nbrOfCopies = 1;
-numberOfGenerations = 500;
+numberOfGenerations = 1000;
 
 
 % Load City Locations
