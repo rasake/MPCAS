@@ -1,9 +1,9 @@
-function [x, speed, brakeT, brakePressure, gear] = RunSlopeDetailed(chromosome, slope)
+function [x, speed, brakeT, brakePressure, gear] = RunSlopeDetailed(chromosome, slope, set)
 
-global STEP_SIZE AMBIENT_T MAX_SPEED MAX_ALPHA MAX_T
+global STEP_SIZE START_SPEED START_T START_GEAR MAX_SPEED MAX_ALPHA MAX_T BETA
 
-%TODO decode chromosme
 
+[weights, thresholds] = DecodeChromosome(chromosome);
 
 
 
@@ -34,7 +34,7 @@ while condition
     
     iBrakeT = brakeT(i);
     networkInput = [iSpeed/MAX_SPEED; iAlpha/MAX_ALPHA; iBrakeT/MAX_T];
-    networkOutput = FeedForward(networkInput, weights, thresholds, beta);
+    networkOutput = FeedForward(networkInput, weights, thresholds, BETA);
     iBrakePressure = (networkOutput(1)+1)/2; %mapping output to [0,1]
     brakePressure(i) = iBrakePressure;
     tmp = networkOutput(1);
