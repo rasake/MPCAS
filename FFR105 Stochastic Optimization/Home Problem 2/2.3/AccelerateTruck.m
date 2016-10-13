@@ -37,10 +37,11 @@ end
 truckAcceleration = (Fg - foundationBrakeForce - engineBrakeForce) / TRUCKMASS;
 newSpeed = speed + truckAcceleration * STEP_SIZE;
 
+relBrakeT = brakeT-AMBIENT_T;
 if brakePressure < 0.01
-    newRelBrakeT = brakeT - brakeT/TAU;
+    newRelBrakeT = relBrakeT - brakeT/TAU * STEP_SIZE;
 else
-    newRelBrakeT = brakeT - Ch*brakePressure;
+    newRelBrakeT = relBrakeT + Ch*brakePressure * STEP_SIZE;
 end
 newBrakeT = AMBIENT_T + newRelBrakeT;
 
