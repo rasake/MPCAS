@@ -45,7 +45,7 @@ if brakePressure < 0.01
 else
     newRelBrakeT = relBrakeT + Ch*brakePressure * STEP_SIZE;
 end
-newBrakeT = AMBIENT_T + newRelBrakeT;
+newBrakeT = max(AMBIENT_T + newRelBrakeT, AMBIENT_T);
 
 end
 
