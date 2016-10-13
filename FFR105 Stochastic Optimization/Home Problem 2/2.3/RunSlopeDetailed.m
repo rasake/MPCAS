@@ -38,7 +38,7 @@ while condition
     iBrakePressure = (networkOutput(1)+1)/2; %mapping output to [0,1]
     brakePressure(i) = iBrakePressure;
     tmp = networkOutput(1);
-    desiredGearChange = sign(tmp).*heaviside(abs(tmp)-0.5); %mapping output to {-1,0,1}
+    desiredGearChange = sign(tmp).*heaviside(abs(tmp)-0.1); %mapping output to {-1,0,1}
     
     if i == 1
         oldGear = START_GEAR;
