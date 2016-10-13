@@ -16,13 +16,13 @@ START_SPEED = 20; %m/s
 START_GEAR = 7;
 START_T = 500; %K
 
-STEP_SIZE = 0.01;
+STEP_SIZE = 0.1;
 
-NBR_HIDDEN_NEURONS = 5;
-BETA = 0.5;
+NBR_HIDDEN_NEURONS = 3;
+BETA = 0.2;
 
-populationSize = 50;
-nbrGenerations = 200;
+populationSize = 30;
+nbrGenerations = 20;
 nbrGenes = 6*NBR_HIDDEN_NEURONS+2;
 crossOverProbability = 0.3;
 mutationProbability = 1/nbrGenes;
@@ -38,10 +38,13 @@ population = InitializePopulation(populationSize, nbrGenes);
 %Evaluation
 fitness = zeros(populationSize,1);
 bestFitnessEver = 0;
+validationFitness = 0;
 for k=1:nbrGenerations
     %Evaluation
     for i = 1:populationSize
-        fitness(i) = EvaluateChromosome(population(i,:));
+        fitness(i) = EvaluateChromosome(population(i,:), 1);
+        tmp = EvaluateChromosome(population(i,:), 2);
+        validationFitness(i) = mean(tmp);
     end
 
     %Reproduction
@@ -73,7 +76,23 @@ for k=1:nbrGenerations
     end
     % Generational replacement
     population = InsertBestIndividual(newPopulation, bestIndividualEver, nbrOfCopies);
+    
+    % Hold out validation
+    if i > 50
+        oldAverage = mean(validationFitness(-25,10));
+        newAverage = mean(validationFitness(-15:end));
+        if newAverage > oldAverage % validation eror is going up
+            tapOut = true;
+        end
+    else
+        tapOut = false;
+    end
+    if tapOut
+        break
+    end
 end
+
+
 
 disp('Best individual found')
 disp(num2str(bestIndividualEver))
