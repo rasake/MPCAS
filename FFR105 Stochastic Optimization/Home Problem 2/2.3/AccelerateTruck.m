@@ -35,7 +35,9 @@ switch gear
 end
 
 truckAcceleration = (Fg - foundationBrakeForce - engineBrakeForce) / TRUCKMASS;
+
 newSpeed = speed + truckAcceleration * STEP_SIZE;
+newSpeed = max(newSpeed,0);
 
 relBrakeT = brakeT-AMBIENT_T;
 if brakePressure < 0.01
