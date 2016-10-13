@@ -2,7 +2,8 @@ function fitness = EvaluateChromosome(chromosome)
 
 global STEP_SIZE START_SPEED START_T START_GEAR MAX_SPEED MAX_ALPHA MAX_T BETA
 
-[weights, thresholds] = DecodeChromosome(chromosome)
+
+[weights, thresholds] = DecodeChromosome(chromosome);
 
 
 tmpFitnessArray = zeros(1,10);
@@ -67,6 +68,7 @@ for slope = 1:10;
     tmpFitnessArray(slope) = sumSpeed/i * totDistance;
 end
 
-fitness = (mean(tmpFitnessArray) + min(tmpFitnessArray))/2;
+%fitness = (mean(tmpFitnessArray) + min(tmpFitnessArray))/2;
+fitness = mean(tmpFitnessArray);
 end
 
