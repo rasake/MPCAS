@@ -17,13 +17,15 @@ def fold_neurons(nbr_neurons, nbr_folds):
     return [np.array([index//nbr_folds, index%nbr_folds]) for index in range(nbr_neurons)]
 
 def find_winning_neuron(weight_matrix, pattern):
-    euclidian_dist = [norm(np.reshape(w_i,[2,1])-pattern) for w_i in weight_matrix]
+    dim = len(pattern)
+    euclidian_dist = [norm(np.reshape(w_i,[dim,1])-pattern) for w_i in weight_matrix]
     return np.argmin(euclidian_dist)
 
 
 def update_weight_matrix(weight_matrix, positions, sample, sigma, eta):
      #Updates weight matrix IN PLACE (!)
+     nbr_neurons, input_dim = np.shape(weight_matrix)
      winning_neuron = find_winning_neuron(weight_matrix, sample)
      proximity_factors = neighbourhood_function(positions, winning_neuron, sigma)
-     delta_w = [proximity_factors[i]*(np.reshape(sample, [2]) - w_i) for i,w_i in enumerate(weight_matrix)]
-     weight_matrix += eta * np.reshape(delta_w, [len(delta_w),2])
+     delta_w = [proximity_factors[i]*(np.reshape(sample, [input_dim]) - w_i) for i,w_i in enumerate(weight_matrix)]
+     weight_matrix += eta * np.reshape(delta_w, [nbr_neurons, input_dim])
