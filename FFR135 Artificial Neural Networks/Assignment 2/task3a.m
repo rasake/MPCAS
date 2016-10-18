@@ -11,7 +11,7 @@ tMaxSup = 3e3;
 beta = 0.5;
 nbrTrials = 20;
 
-classErrorList = ones(nbrTrials);
+classErrorList = ones(1,nbrTrials);
 for i = 1:nbrTrials
 [radWeights, perWeights, perThreshold, classError, trData,valData] = TrainHybridNetwork(nbrInputNodes, ...
     nbrRadialFunctions, etaUnsup, etaSup, tMaxUnsup, tMaxSup, beta);
