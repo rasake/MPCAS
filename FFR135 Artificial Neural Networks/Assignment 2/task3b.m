@@ -12,9 +12,9 @@ beta = 0.5;
 nbrTrials = 20;
 
 classErrorAverages = zeros(1,maxNbrRadFunctions);
-parfor k = 1:maxnbrmaxNbrRadFunctions
+parfor k = 1:maxNbrRadFunctions
     nbrRadialFunctions = k;
-    classErrorList = ones(nbrTrials);
+    classErrorList = ones(1,nbrTrials);
     networksStruct = struct;
     for i = 1:nbrTrials
         [radWeights, perWeights, perThreshold, classError, trData,valData] = TrainHybridNetwork(nbrInputNodes, ...
