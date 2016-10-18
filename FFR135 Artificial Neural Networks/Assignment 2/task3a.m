@@ -27,6 +27,7 @@ end
 %% Extract best network
 [minError, index] = min(classError);
 disp(['Minimal classification error achieved: ' num2str(minError)])
+disp(['Average classification error achieved: ' num2str(mean(classErrorList))]);
 radWeigths = networksStruct(index).radialWeights;
 perWeights = networksStruct(index).perceptronWeights;
 perThreshold = networksStruct(index).perceptronThreshold;
