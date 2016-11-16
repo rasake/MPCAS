@@ -137,9 +137,13 @@ def update_strategies(strategy_matrix, pay_off_matrix, nbr_rounds, p_mut):
 
 
 
-def run_cellular_automaton(nbr_time_steps, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off, p_mut, board_size = 32):
+def run_cellular_automaton(nbr_time_steps, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off, p_mut, board_size = 32, plot = True):
     
     strategy_matrix = PeriodicMatrix(np.floor(np.random.rand(board_size, board_size)*(nbr_rounds+1)))
+    if plot:
+        sns.heatmap(strategy_matrix, vmin = 0, vmax = nbr_rounds)
+        plt.savefig("C:\\Users\\Rasmus\\Documents\Cellular Automata\\ca_0.png", dpi = 400)
+        plt.close()
     
     strategy_time_evolution = np.zeros([nbr_time_steps, nbr_rounds+1])
     for k in range(nbr_rounds+1):
@@ -147,55 +151,101 @@ def run_cellular_automaton(nbr_time_steps, nbr_rounds, reward_pay_off, temptatio
     for t in range(1,nbr_time_steps):
         pay_off_matrix = evaluate_strategies(strategy_matrix,nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off)
         strategy_matrix = update_strategies(strategy_matrix, pay_off_matrix, nbr_rounds, p_mut)
-        sns.heatmap(strategy_matrix, vmin = 0, vmax = nbr_rounds)
-        plt.savefig("C:\\Users\\Rasmus\\Documents\Cellular Automata\\ca_" + str(t) + ".png", dpi = 400)
-        plt.close()
+        if plot:
+            sns.heatmap(strategy_matrix, vmin = 0, vmax = nbr_rounds)
+            plt.savefig("C:\\Users\\Rasmus\\Documents\Cellular Automata\\ca_" + str(t) + ".png", dpi = 400)
+            plt.close()
 
         for k in range(nbr_rounds+1):
             strategy_time_evolution[t,k] = np.sum(strategy_matrix == k)/board_size**2
 
+    return strategy_time_evolution, strategy_matrix
 
+def plot_time_evolution(strategy_time_evolution, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off):    
+    title_str = "Strategy time evolution for: R= " + str(reward_pay_off) 
+    title_str += ", T=" + str(temptation_pay_off) + ", S=" + str(sucker_pay_off)
+    title_str += ", P=" + str(punishment_pay_off)
     legend_strings = []
+    sns.set_style('white')
+    sns.set_palette(sns.color_palette("RdBu", n_colors=nbr_rounds+1))
     for k in range(nbr_rounds+1):
         plt.plot(strategy_time_evolution[:,k])
         legend_strings.append("S_" + str(k))
     plt.legend(legend_strings)
-        
-        
+    plt.title(title_str)
+    plt.savefig("C:\\Users\\Rasmus\\Documents\Cellular Automata\\time_evo.png", dpi = 400)
+
+
+def final_strategy_distribution(strategy_time_evolution, nbr_rounds, hindsight):
+    distribution = []
+    for k in range(nbr_rounds+1):
+        time_average = np.mean(strategy_time_evolution[-hindsight:,k])
+        distribution.append(time_average)
+    return distribution
+
+def find_regime(strategy_distribution):
+    if strategy_distribution[0] + strategy_distribution[1] > 0.7:
+        return 1
+    if strategy_distribution[-1] + strategy_distribution[-2] > 0.7:
+        return 2
+    else:
+        return 3
+
+
+def explore_tp_space(nbr_time_steps, nbr_interior_points, hindsight):
+    
+    nbr_interior_points = 10
+    nbr_time_steps = 100
+    nbr_rounds = 7
+    reward_pay_off = 1
+    sucker_pay_off = 0
+    p_mut = 1/32**2
+    
+    
+    regime_map = np.zeros([nbr_interior_points, nbr_interior_points])
+    temptation_pay_offs = np.linspace(1,2,nbr_interior_points)
+    punishment_pay_offs = np.linspace(0,1,nbr_interior_points)
+    for i, temptation_i in enumerate(temptation_pay_offs):
+        for j, punishment_j in enumerate(punishment_pay_offs):
+            strategy_time_evolution, strategy_matrix = run_cellular_automaton(nbr_time_steps, nbr_rounds, reward_pay_off, temptation_i, sucker_pay_off, punishment_j, p_mut, plot=False)
+            strategy_dist = final_strategy_distribution(strategy_time_evolution, nbr_rounds, hindsight)
+            regime = find_regime(strategy_dist)
+            regime_map[i][j] = regime
+            
+            
+    return temptation_pay_offs, punishment_pay_offs, regime_map
+
+
+
 
 def main():
     
-    nbr_time_steps = 100
-    nbr_rounds = 6
+    nbr_time_steps = 10
+    nbr_rounds = 7
     reward_pay_off = 1
     temptation_pay_off = 1.5
     sucker_pay_off = 0
-    punishment_pay_off = 0.5
+    punishment_pay_off = 0.8
     p_mut = 1/32**2
 
-    run_cellular_automaton(nbr_time_steps, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off, p_mut)
+    strategy_time_evolution, strategy_matrix = run_cellular_automaton(nbr_time_steps, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off, p_mut, plot=False)
+    sns.heatmap(strategy_matrix, vmin = 0, vmax = nbr_rounds)
+    plt.savefig("C:\\Users\\Rasmus\\Documents\Cellular Automata\\ca_final.png", dpi = 400)
+    plt.close()
     
-    #strategy_matrix = PeriodicMatrix(np.round(np.random.rand(32,32)*nbr_rounds))
-    #pay_off_matrix = evaluate_strategies(strategy_matrix,nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off)
-    #update_strategies(strategy_matrix, pay_off_matrix, nbr_rounds, p_mut)
+    plot_time_evolution(strategy_time_evolution, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off)
     
-    #sns.heatmap(strategy_matrix)
-    #plt.savefig("C:\\Users\\Rasmus\\Documents\Cellular Automata\\ca.png", dpi = 400)
-    
-    """
 
-    vvw           =   cv2.VideoWriter('mymovie.avi',cv2.VideoWriter_fourcc('X','V','I','D'),24,(640,480))
-    frameslist    =   os.listdir("C:\\Users\\Rasmus\\Documents\Cellular Automata\\")
-    howmanyframes =   len(frameslist)
-    print('Frames count: '+str(howmanyframes)) #just for debugging
 
-    for i in range(0,howmanyframes):
-        print(i)
-        theframe = cv2.imread('.\\frames\\'+frameslist[i])
-        vvw.write(theframe)    
-        """
+def main3():
+    temptation_pay_offs, punishment_pay_offs, regime_map = explore_tp_space(10,3,2)
+    map_filpped = np.flipud(regime_map)
+    punishments_reversed = punishment_pay_offs[::-1]
+    sns.heatmap(map_filpped, xticklabels=temptation_pay_offs, yticklabels=punishments_reversed)
     
-if __name__ == "__main__": main()
+
+    
+if __name__ == "__main__": main3()
 
 # structure
 
