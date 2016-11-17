@@ -187,14 +187,15 @@ def final_strategy_distribution(strategy_time_evolution, nbr_rounds, hindsight):
         time_average = np.mean(strategy_time_evolution[-hindsight:,k])
         distribution.append(time_average)
     return distribution
+    
 
 def find_regime(strategy_distribution):
-    if strategy_distribution[0] + strategy_distribution[1] > 0.7:
+    if strategy_distribution[0] > 0.6:
         return 1
     if strategy_distribution[-1] + strategy_distribution[-2] > 0.7:
-        return 2
-    else:
         return 3
+    else:
+        return 2
 
 
 def explore_tp_space(nbr_time_steps, nbr_interior_points, hindsight):
@@ -217,13 +218,17 @@ def explore_tp_space(nbr_time_steps, nbr_interior_points, hindsight):
     return temptation_pay_offs, punishment_pay_offs, regime_map
 
 
-def generate_single_run_graphs(nbr_time_steps, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off, p_mut = 1/32**2, file_id_str = ""):
+def generate_single_run_graphs(nbr_time_steps, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off, p_mut = 1/32**2, file_id_str = "", hindsight = 5):
     
     strategy_time_evolution, strategy_matrix = run_cellular_automaton(nbr_time_steps, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off, p_mut, plot=False)
     sns.heatmap(strategy_matrix, vmin = 0, vmax = nbr_rounds)
     plt.savefig("C:\\Users\\Rasmus\\Documents\Cellular Automata\\ca_final" + file_id_str + ".png", dpi = 400)
     plt.show()
     plt.close()
+    
+    strategy_dist = final_strategy_distribution(strategy_time_evolution, nbr_rounds, hindsight)
+    regime = find_regime(strategy_dist)
+    print("Regime classification: " + str(regime))
     
     plot_time_evolution(strategy_time_evolution, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off, file_id_str)
     
@@ -253,7 +258,7 @@ def demonstrate_regime2(nbr_time_steps, nbr_rounds):
     reward_pay_off = 1
     temptation_pay_off = 1.5
     sucker_pay_off = 0
-    punishment_pay_off = 0.1
+    punishment_pay_off = 0.5
     id_str = "_regime2"
     
     print_settings(reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off)
@@ -264,7 +269,7 @@ def demonstrate_regime3(nbr_time_steps, nbr_rounds):
     reward_pay_off = 1
     temptation_pay_off = 1.5
     sucker_pay_off = 0
-    punishment_pay_off = 0.5
+    punishment_pay_off = 0.1
     id_str = "_regime3"
     
     print_settings(reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off)
@@ -273,8 +278,8 @@ def demonstrate_regime3(nbr_time_steps, nbr_rounds):
 
 
 def generate_regime_graph():
-    nbr_time_steps = 10
-    nbr_interior_points = 3
+    nbr_time_steps = 100
+    nbr_interior_points = 10
     hindsight = 2
     temptation_pay_offs, punishment_pay_offs, regime_map = explore_tp_space(nbr_time_steps, nbr_interior_points, hindsight)
     map_filpped = np.flipud(regime_map)
