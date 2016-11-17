@@ -7,9 +7,14 @@ Created on Mon Nov  7 14:01:21 2016
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-#import cv2
 import os
 
+def print_settings(reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off):
+    print("Game settings:")
+    print("reward_pay_off = " + str(reward_pay_off))
+    print("temptation_pay_off = " + str(temptation_pay_off))
+    print("sucker_pay_off = " + str(sucker_pay_off))
+    print("punishment_pay_off = " + str(punishment_pay_off))
 
 def maxelements(seq): # @John Machin
     ''' Return list of position(s) of largest element '''
@@ -25,7 +30,7 @@ def maxelements(seq): # @John Machin
             max_indices = [i]
     return max_indices
 
-
+    
 class PeriodicMatrix(np.matrix):
      def __getitem__(self, index):
          nbr_rows, nbr_columns = self.shape
@@ -50,7 +55,8 @@ class PeriodicMatrix(np.matrix):
              row_index = row_index % nbr_rows
              column_index = column_index % nbr_columns
              return super().__setitem__((row_index, column_index), value)
-                  
+
+
 
 class Player(object):
     
@@ -72,7 +78,6 @@ class Player(object):
             self.rounds_played += 1
             return "cooperate"
             
- 
 
 def play_game(patience1, patience2, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off):       
     player1_pay_off = 0
@@ -161,7 +166,7 @@ def run_cellular_automaton(nbr_time_steps, nbr_rounds, reward_pay_off, temptatio
 
     return strategy_time_evolution, strategy_matrix
 
-def plot_time_evolution(strategy_time_evolution, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off):    
+def plot_time_evolution(strategy_time_evolution, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off, file_id_str = ""):    
     title_str = "Strategy time evolution for: R= " + str(reward_pay_off) 
     title_str += ", T=" + str(temptation_pay_off) + ", S=" + str(sucker_pay_off)
     title_str += ", P=" + str(punishment_pay_off)
@@ -173,7 +178,7 @@ def plot_time_evolution(strategy_time_evolution, nbr_rounds, reward_pay_off, tem
         legend_strings.append("S_" + str(k))
     plt.legend(legend_strings)
     plt.title(title_str)
-    plt.savefig("C:\\Users\\Rasmus\\Documents\Cellular Automata\\time_evo.png", dpi = 400)
+    plt.savefig("C:\\Users\\Rasmus\\Documents\Cellular Automata\\time_evo" + file_id_str + ".png", dpi = 400)
 
 
 def final_strategy_distribution(strategy_time_evolution, nbr_rounds, hindsight):
@@ -194,13 +199,10 @@ def find_regime(strategy_distribution):
 
 def explore_tp_space(nbr_time_steps, nbr_interior_points, hindsight):
     
-    nbr_interior_points = 10
-    nbr_time_steps = 100
     nbr_rounds = 7
     reward_pay_off = 1
     sucker_pay_off = 0
     p_mut = 1/32**2
-    
     
     regime_map = np.zeros([nbr_interior_points, nbr_interior_points])
     temptation_pay_offs = np.linspace(1,2,nbr_interior_points)
@@ -210,44 +212,72 @@ def explore_tp_space(nbr_time_steps, nbr_interior_points, hindsight):
             strategy_time_evolution, strategy_matrix = run_cellular_automaton(nbr_time_steps, nbr_rounds, reward_pay_off, temptation_i, sucker_pay_off, punishment_j, p_mut, plot=False)
             strategy_dist = final_strategy_distribution(strategy_time_evolution, nbr_rounds, hindsight)
             regime = find_regime(strategy_dist)
-            regime_map[i][j] = regime
-            
+            regime_map[i][j] = regime       
             
     return temptation_pay_offs, punishment_pay_offs, regime_map
 
 
-
-
-def main():
+def generate_single_run_graphs(nbr_time_steps, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off, p_mut = 1/32**2, file_id_str = ""):
     
-    nbr_time_steps = 10
-    nbr_rounds = 7
+    strategy_time_evolution, strategy_matrix = run_cellular_automaton(nbr_time_steps, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off, p_mut, plot=False)
+    sns.heatmap(strategy_matrix, vmin = 0, vmax = nbr_rounds)
+    plt.savefig("C:\\Users\\Rasmus\\Documents\Cellular Automata\\ca_final" + file_id_str + ".png", dpi = 400)
+    plt.show()
+    plt.close()
+    
+    plot_time_evolution(strategy_time_evolution, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off, file_id_str)
+    
+def demonstrate_basic_model(nbr_time_steps, nbr_rounds):
+    reward_pay_off = 1
+    temptation_pay_off = 1.5
+    sucker_pay_off = 0
+    punishment_pay_off = 0.5
+    id_str = "_basic_model_" + str(nbr_time_steps) + "_steps_"
+    
+    print_settings(reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off)
+    
+    generate_single_run_graphs(nbr_time_steps, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off, file_id_str = id_str)
+
+def demonstrate_regime1(nbr_time_steps, nbr_rounds):
     reward_pay_off = 1
     temptation_pay_off = 1.5
     sucker_pay_off = 0
     punishment_pay_off = 0.8
-    p_mut = 1/32**2
-
-    strategy_time_evolution, strategy_matrix = run_cellular_automaton(nbr_time_steps, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off, p_mut, plot=False)
-    sns.heatmap(strategy_matrix, vmin = 0, vmax = nbr_rounds)
-    plt.savefig("C:\\Users\\Rasmus\\Documents\Cellular Automata\\ca_final.png", dpi = 400)
-    plt.close()
+    id_str = "_regime1"
     
-    plot_time_evolution(strategy_time_evolution, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off)
+    print_settings(reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off)
     
+    generate_single_run_graphs(nbr_time_steps, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off, file_id_str = id_str)
+
+def demonstrate_regime2(nbr_time_steps, nbr_rounds):
+    reward_pay_off = 1
+    temptation_pay_off = 1.5
+    sucker_pay_off = 0
+    punishment_pay_off = 0.1
+    id_str = "_regime2"
+    
+    print_settings(reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off)
+    
+    generate_single_run_graphs(nbr_time_steps, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off, file_id_str = id_str)
+
+def demonstrate_regime3(nbr_time_steps, nbr_rounds):
+    reward_pay_off = 1
+    temptation_pay_off = 1.5
+    sucker_pay_off = 0
+    punishment_pay_off = 0.5
+    id_str = "_regime3"
+    
+    print_settings(reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off)
+
+    generate_single_run_graphs(nbr_time_steps, nbr_rounds, reward_pay_off, temptation_pay_off, sucker_pay_off, punishment_pay_off, file_id_str = id_str)
 
 
-def main3():
-    temptation_pay_offs, punishment_pay_offs, regime_map = explore_tp_space(10,3,2)
+def generate_regime_graph():
+    nbr_time_steps = 10
+    nbr_interior_points = 3
+    hindsight = 2
+    temptation_pay_offs, punishment_pay_offs, regime_map = explore_tp_space(nbr_time_steps, nbr_interior_points, hindsight)
     map_filpped = np.flipud(regime_map)
     punishments_reversed = punishment_pay_offs[::-1]
     sns.heatmap(map_filpped, xticklabels=temptation_pay_offs, yticklabels=punishments_reversed)
-    
-
-    
-if __name__ == "__main__": main3()
-
-# structure
-
-# 1. For each cell j, play against surronding cell, calculate total payoff for cell j
-# 2. For each cell, update strategies according to payoffs in surrounding cells
+    plt.show()
