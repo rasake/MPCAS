@@ -23,7 +23,7 @@ for i=1:nbrDataPoints
         A(nodesToDelete,:) = [];
         A(:,nodesToDelete) = [];
         C = ClusterMatrix(A);
-        relClst(i) = max(sum(C))/length(A);
+        relClst(j) = max(sum(C))/length(A);
     end
     clstrSizesR(i) = mean(relClst);
 end
@@ -44,7 +44,7 @@ for i=1:nbrDataPoints
         A(nodesToDelete,:) = [];
         A(:,nodesToDelete) = [];
         C = ClusterMatrix(A);
-        relClst(i) = max(sum(C))/length(A);
+        relClst(j) = max(sum(C))/length(A);
     end
     clstrSizesS(i) = mean(relClst);
 end
@@ -75,7 +75,7 @@ for i=1:nbrDataPoints
         A(nodesToDelete,:) = [];
         A(:,nodesToDelete) = [];
         C = ClusterMatrix(A);
-        relClst(i) = max(sum(C))/length(A);
+        relClst(j) = max(sum(C))/length(A);
     end
     clstrSizesR(i) = mean(relClst);
 end
@@ -98,7 +98,7 @@ for i=1:nbrDataPoints
         A(nodesToDelete,:) = [];
         A(:,nodesToDelete) = [];
         C = ClusterMatrix(A);
-        relClst(i) = max(sum(C))/length(A);
+        relClst(j) = max(sum(C))/length(A);
     end
     clstrSizesS(i) = mean(relClst);
 end
