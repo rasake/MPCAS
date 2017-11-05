@@ -12,7 +12,7 @@ from scipy import stats
 
 def make_regplot(x,y, x_label, y_label, save_folder):
     slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
-    ax = sns.regplot(x,y)
+    ax = sns.regplot(x,y, ci=False)
     # these are matplotlib.patch.Patch properties
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.8)
     textstr = '$\mathrm{intercept} = %.3f$\n$\mathrm{slope}=%.2f$\n$\mathrm{r2}=%.2f$'%(intercept, slope, r_value**2)
