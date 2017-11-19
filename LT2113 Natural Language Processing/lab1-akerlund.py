@@ -8,6 +8,9 @@ Created on Tue Nov  7 13:45:59 2017
 
 # module imports
 import nltk
+import numpy as np
+from operator import itemgetter
+import matplotlib.pyplot as plt
 
 
 # constants
@@ -104,31 +107,184 @@ def evaluate_tokenization(test_tokens, gold_tokens):
     print("F-score:   %5.2f %%" % (100 * fscore))
     print()
 
-if __name__ == "__main__":
-    nr_files = 50
-    corpus_text = get_corpus_text(nr_files)
-    print(type(corpus_text))
+def find_nbr_word_tokens(corpus):
+    tokens = tokenize_corpus(corpus)
+    return len(tokens)
+    
+def find_nbr_word_types(corpus):
+    tokens = tokenize_corpus(corpus)
+    return len(set(tokens))
+
+def find_average_token_length(corpus):
+    tokens = tokenize_corpus(corpus)
+    return np.mean([len(x) for x in tokens])
+    
+def find_longest_words(corpus):
+    tokens = tokenize_corpus(corpus)
+    word_types = set(tokens)
+    longest_words = []
+    max_length = 0
+    
+    for word in word_types:
+        word_length  = len(word)
+        if word_length < max_length:
+            pass # do nothing
+        elif word_length == max_length:
+            longest_words.append(word)
+        else: # meaning new max lenght found
+            max_length = word_length
+            longest_words = [word] # Reset the list
+    return (longest_words, max_length)
+
+def find_frequencies(corpus):    
+    tokens = tokenize_corpus(corpus) 
+    frequencies = {}
+    for token in tokens:
+        try:
+            frequencies[token] += 1
+        except KeyError:
+            frequencies[token] = 1
+    return frequencies
+
+def find_hapax_words(corpus):
+    frequencies = find_frequencies(corpus)
+    hapax_words = []
+    for word, freq in frequencies.items():
+        if freq == 1:
+            hapax_words.append(word)
+    return hapax_words
+     
+def find_nbr_hapax_tokens(corpus):
+    frequencies = find_frequencies(corpus)
+    nbr_hapax_tokens = 0
+    for word, freq in frequencies.items():
+        if freq == 1:
+            nbr_hapax_tokens += 1
+    return nbr_hapax_tokens
+            
+def find_hapax_fraction(corpus):
+    return find_nbr_hapax_tokens(corpus)/find_nbr_word_tokens(corpus)
+
+def find_most_frequent_words(corpus, N):
+    freqs = find_frequencies(corpus)
+    sorted_freqs = sorted(freqs.items(), key=itemgetter(1))
+    sorted_freqs.reverse()
+    return [x[0] for x in sorted_freqs[0:N]]
+
+def find_most_frequent_words_fraction(corpus, N):
+    freqs = find_frequencies(corpus)
+    sorted_freqs = sorted(freqs.items(), key=itemgetter(1))
+    sorted_freqs.reverse()
+    return sum([x[1] for x in sorted_freqs[0:N]])/find_nbr_word_tokens(corpus)
+
+def find_nbr_bigrams(corpus):
+    tokens = tokenize_corpus(corpus)
+    bigrams = list(nltk.bigrams(tokens))
+    return len(bigrams)
+
+def find_nbr_unique_bigrams(corpus):
+    tokens = tokenize_corpus(corpus)
+    bigrams = nltk.bigrams(tokens)
+    freqs = nltk.FreqDist(bigrams)
+    nbr_unique = 0
+    for sample in freqs:
+        if freqs[sample] == 1:
+            nbr_unique += 1
+    return nbr_unique
+
+def find_nbr_unique_bigrams_fraction(corpus):
+    return find_nbr_unique_bigrams(corpus) / find_nbr_bigrams(corpus)
+
+def find_nbr_trigrams(corpus):
+    tokens = tokenize_corpus(corpus)
+    trigrams = list(nltk.trigrams(tokens))
+    return len(trigrams)
+
+def find_nbr_unique_trigrams(corpus):
+    tokens = tokenize_corpus(corpus)
+    trigrams = nltk.trigrams(tokens)
+    freqs = nltk.FreqDist(trigrams)
+    nbr_unique = 0
+    for sample in freqs:
+        if freqs[sample] == 1:
+            nbr_unique += 1
+    return nbr_unique
+
+def find_nbr_unique_trigrams_fraction(corpus):
+    return find_nbr_unique_trigrams(corpus) / find_nbr_trigrams(corpus)
+
+def sub_corpus_hapax_fractions(corpus, nbr_slices): 
+    slice_size = int(len(corpus)/nbr_slices)
+    hapax_fractions = np.zeros(nbr_slices)
+    for i in range(nbr_slices):
+        i_corpus = corpus[i*slice_size: (i+1)*slice_size]
+        hapax_fractions[i] = find_hapax_fraction(i_corpus)
+    return hapax_fractions
+
+def corpus_size_vs_hapax_fraction(corpus, nbr_slices):
+    slice_size = int(len(corpus)/nbr_slices)
+    hapax_fractions = np.zeros(nbr_slices)
+    corpus_sizes = np.zeros(nbr_slices)
+    for i in range(nbr_slices):
+        i_corpus = corpus[0: (i+1)*slice_size]
+        hapax_fractions[i] = find_hapax_fraction(i_corpus)
+        corpus_sizes[i] = find_nbr_word_tokens(i_corpus)
+    return hapax_fractions, corpus_sizes
+
+def make_hapax_plot(corpus, nbr_slices):
+    hapax_fractions, corpus_sizes = corpus_size_vs_hapax_fraction(corpus, nbr_slices)
+    plt.plot(corpus_sizes, hapax_fractions)
+    plt.xlabel('Corpus Size')
+    plt.ylabel('Number of Hapax Words')
+    plt.savefig('size_vs_hapax.png', dpi = 800)
+
+
+def print_corpus_statistics(corpus):
+    print('Number of word tokens in corpus: %d' % find_nbr_word_tokens(corpus))    
+    print('Number of word types in corpus: %d' % find_nbr_word_types(corpus))    
+    print('Aveage token length: %.2f' % find_average_token_length(corpus)) 
+    longest_words, max_length = find_longest_words(corpus)
+    print('Maximum word length: %d' % max_length)
+    print('Words with maximum length: ' + ', '. join(longest_words))
+    print('Number of hapax tokens: %d' % find_nbr_hapax_tokens(corpus))
+    print('The hapax word types make up %.1f%% of the corpus' % \
+        (100*find_hapax_fraction(corpus)))
+    print('The ten most frequent words are: ' + str(find_most_frequent_words(corpus, 10)))
+    print('The ten most frequent words make up %.0f%% of the corpus' % \
+        (100*find_most_frequent_words_fraction(corpus, 10)))
+    print('Hapax token pecentages in ten equal-sized sub-corpuses: ' + \
+        '%, '.join(['%.1f' % (100*x) for x in sub_corpus_hapax_fractions(corpus, 10)]) + \
+        '%')
+    print('Hapax token pecentages in ten sub-corpuses of increasing size' + \
+        '(from a tenth of the corpus to the whole corpus): ' + \
+        '%, '.join( \
+        ['%.1f' % (100*x) for x in corpus_size_vs_hapax_fraction(corpus, 10)[0]]) + \
+        '%')
+    print('Number of unique bigrams: %d' % find_nbr_unique_bigrams(corpus))
+    print('The unique bigrams make up %.1f%% of the corpus' % \
+        (100*find_nbr_unique_bigrams_fraction(corpus)))
+    print('Number of unique trigrams: %d' % find_nbr_unique_trigrams(corpus))
+    print('The unique trigrams make up %.1f%% of the corpus' % \
+        (100*find_nbr_unique_trigrams_fraction(corpus)))
+
+def main():
+    nr_files = 199
+    corpus = get_corpus_text(nr_files)
+    
+    
+    print('Part 1, evaluating the regex')
+    print('------------------------------')
     gold_tokens = get_gold_tokens(nr_files)
-    tokens = tokenize_corpus(corpus_text)
+    tokens = tokenize_corpus(corpus)
     evaluate_tokenization(tokens, gold_tokens)
     
-"""
-Corpus statistics
+    print('\n \n \nPart 2, corpus statistics')
+    print('------------------------------')
+    print_corpus_statistics(corpus)
+    
+    # make_hapax_plot(corpus, 30) #uncomment to make and save plot
 
-Use the tokenized corpus to answer the following questions:
+if __name__ == "__main__":
+    main()
 
-How big is the corpus in terms of the number of word tokens and in terms of word types?
-What is the average word token length?
-What is the longest word length and what words have that length?
-How many hapax words are there? How many percent of the corpus do they represent?
-(For this question and the questions below, by corpus size, we mean the number of tokens)
-Which are the 10 most frequent words? How many percent of the corpus do they represent?
-Divide the corpus in 10 slices of equal sizes: s[0]...s[9].
-How many hapaxes are there in each of the slices in terms of percentage of the subcorpus?
-Now look at subcorpora of increasing size: s[0], s[0]+s[1], s[0]+s[1]+s[2], and so on, until you have reconstructed the complete corpus. How many hapaxes are there in each of these subcorpora? How much is it in each case in terms of a percentage of the subcorpus?
-Draw the results from question 6 in a graph.
-How many unique word bigrams are there in the corpus? How many percent do they represent of all bigrams?
-How many unique trigrams are there? How many percent of all trigrams do they represent?
-Implemented each of these questions as a function that takes the corpus as its argument and returns the answer:
 
-"""
