@@ -5,7 +5,6 @@ Created on Tue Nov  7 13:45:59 2017
 @author: Rasmus
 """
 
-
 # module imports
 import nltk
 import numpy as np
@@ -14,7 +13,6 @@ import matplotlib.pyplot as plt
 
 
 # constants
-corpus_size = (...)
 TOKEN_REGEXP = r'''(?x)    # set flag to allow verbose regexps
   (?:[A-Z]\.)+        # abbreviations, e.g. U.S.A.
 | Mr\.|Mrs\.|Jr\.|Ms\.
@@ -108,18 +106,24 @@ def evaluate_tokenization(test_tokens, gold_tokens):
     print()
 
 def find_nbr_word_tokens(corpus):
+    """ Returns the number of word tokens in the corpus. """
     tokens = tokenize_corpus(corpus)
     return len(tokens)
     
 def find_nbr_word_types(corpus):
+    """ Returns the number of word types in the corpus. """
     tokens = tokenize_corpus(corpus)
     return len(set(tokens))
 
 def find_average_token_length(corpus):
+    """ Returns the average token length in the corpus. """
     tokens = tokenize_corpus(corpus)
     return np.mean([len(x) for x in tokens])
     
 def find_longest_words(corpus):
+    """ Finds the longest words in the corpus. Returns a tuple, the first 
+    element being a list of the longest words, and the second element being
+    the maximum word length. """
     tokens = tokenize_corpus(corpus)
     word_types = set(tokens)
     longest_words = []
@@ -136,7 +140,8 @@ def find_longest_words(corpus):
             longest_words = [word] # Reset the list
     return (longest_words, max_length)
 
-def find_frequencies(corpus):    
+def find_frequencies(corpus): 
+    """ Returns a dictionary with the counts for each word type. """
     tokens = tokenize_corpus(corpus) 
     frequencies = {}
     for token in tokens:
@@ -147,6 +152,7 @@ def find_frequencies(corpus):
     return frequencies
 
 def find_hapax_words(corpus):
+    """ Returns a list of all the hapax word types in the corpus. """
     frequencies = find_frequencies(corpus)
     hapax_words = []
     for word, freq in frequencies.items():
@@ -155,6 +161,7 @@ def find_hapax_words(corpus):
     return hapax_words
      
 def find_nbr_hapax_tokens(corpus):
+    """ Returns the number of hapax word tokens in the corpus. """
     frequencies = find_frequencies(corpus)
     nbr_hapax_tokens = 0
     for word, freq in frequencies.items():
@@ -163,26 +170,33 @@ def find_nbr_hapax_tokens(corpus):
     return nbr_hapax_tokens
             
 def find_hapax_fraction(corpus):
+    """ Returns the fraction of tokens in the corpus that are hapax words. """
     return find_nbr_hapax_tokens(corpus)/find_nbr_word_tokens(corpus)
 
 def find_most_frequent_words(corpus, N):
+    """ Returns a list of tuples of the word type and its counts of the N most 
+    frequent word types in the corpus. """
     freqs = find_frequencies(corpus)
     sorted_freqs = sorted(freqs.items(), key=itemgetter(1))
     sorted_freqs.reverse()
     return [x[0] for x in sorted_freqs[0:N]]
 
 def find_most_frequent_words_fraction(corpus, N):
+    """ Returns the fraction of tokens in the corpus that are of the N most 
+    common word types. """
     freqs = find_frequencies(corpus)
     sorted_freqs = sorted(freqs.items(), key=itemgetter(1))
     sorted_freqs.reverse()
     return sum([x[1] for x in sorted_freqs[0:N]])/find_nbr_word_tokens(corpus)
 
 def find_nbr_bigrams(corpus):
+    """ Returns the total number of bigrams in the corpus. """
     tokens = tokenize_corpus(corpus)
     bigrams = list(nltk.bigrams(tokens))
     return len(bigrams)
 
 def find_nbr_unique_bigrams(corpus):
+    """ Returns the number of unique bigrams in the corpus. """
     tokens = tokenize_corpus(corpus)
     bigrams = nltk.bigrams(tokens)
     freqs = nltk.FreqDist(bigrams)
@@ -193,14 +207,17 @@ def find_nbr_unique_bigrams(corpus):
     return nbr_unique
 
 def find_nbr_unique_bigrams_fraction(corpus):
+    """ Returns the fraction of bigrams in the corpus that unique. """
     return find_nbr_unique_bigrams(corpus) / find_nbr_bigrams(corpus)
 
-def find_nbr_trigrams(corpus):
+def find_nbr_trigrams(corpus):    
+    """ Returns the total number of trigrams in the corpus. """
     tokens = tokenize_corpus(corpus)
     trigrams = list(nltk.trigrams(tokens))
     return len(trigrams)
 
 def find_nbr_unique_trigrams(corpus):
+    """ Returns the number of unique trigrams in the corpus. """
     tokens = tokenize_corpus(corpus)
     trigrams = nltk.trigrams(tokens)
     freqs = nltk.FreqDist(trigrams)
@@ -211,9 +228,12 @@ def find_nbr_unique_trigrams(corpus):
     return nbr_unique
 
 def find_nbr_unique_trigrams_fraction(corpus):
+    """ Returns the fraction of trigrams in the corpus that unique. """
     return find_nbr_unique_trigrams(corpus) / find_nbr_trigrams(corpus)
 
-def sub_corpus_hapax_fractions(corpus, nbr_slices): 
+def sub_corpus_hapax_fractions(corpus, nbr_slices):
+    """ Divides the corpus in equal-sized slices and returns the fraction of 
+    tokens that are hapax words in each slice. """
     slice_size = int(len(corpus)/nbr_slices)
     hapax_fractions = np.zeros(nbr_slices)
     for i in range(nbr_slices):
@@ -222,6 +242,10 @@ def sub_corpus_hapax_fractions(corpus, nbr_slices):
     return hapax_fractions
 
 def corpus_size_vs_hapax_fraction(corpus, nbr_slices):
+    """ Divides the corpus in cumulative slices and calculates the fraction of 
+    tokens that are hapax words in each slice. Returns two lists, the first 
+    being the hapax fractions and the second being the number of tokens in
+    each slice.  """
     slice_size = int(len(corpus)/nbr_slices)
     hapax_fractions = np.zeros(nbr_slices)
     corpus_sizes = np.zeros(nbr_slices)
@@ -232,6 +256,8 @@ def corpus_size_vs_hapax_fraction(corpus, nbr_slices):
     return hapax_fractions, corpus_sizes
 
 def make_hapax_plot(corpus, nbr_slices):
+    """ Makes a plot of the hapax fraction as a function of corpus size by 
+    dividing the corpus in overlapping sub-corpuses of increasing size. """
     hapax_fractions, corpus_sizes = corpus_size_vs_hapax_fraction(corpus, nbr_slices)
     plt.plot(corpus_sizes, hapax_fractions)
     plt.xlabel('Corpus Size')
@@ -240,6 +266,7 @@ def make_hapax_plot(corpus, nbr_slices):
 
 
 def print_corpus_statistics(corpus):
+    """ Prints a number of corpus statistics to the terminal. """
     print('Number of word tokens in corpus: %d' % find_nbr_word_tokens(corpus))    
     print('Number of word types in corpus: %d' % find_nbr_word_types(corpus))    
     print('Aveage token length: %.2f' % find_average_token_length(corpus)) 
@@ -268,9 +295,8 @@ def print_corpus_statistics(corpus):
         (100*find_nbr_unique_trigrams_fraction(corpus)))
 
 def main():
-    nr_files = 199
+    nr_files = 150
     corpus = get_corpus_text(nr_files)
-    
     
     print('Part 1, evaluating the regex')
     print('------------------------------')
