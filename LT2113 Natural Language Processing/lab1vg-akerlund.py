@@ -4,6 +4,8 @@ Created on Mon Nov 20 13:46:55 2017
 
 @author: Rasmus
 """
+
+import sys
 import os.path
 import numpy as np
 from operator import itemgetter
@@ -40,7 +42,6 @@ TOKEN_REGEXP = r'''(?x)    # set flag to allow verbose regexps
 def tokenize_corpus(text):
     """Don't forget the docstring!"""
     return nltk.regexp_tokenize(text, TOKEN_REGEXP)
-
 
 def find_nbr_word_tokens(corpus):
     """ Returns the number of word tokens in the corpus. """
@@ -186,20 +187,20 @@ def print_corpus_statistics(corpus):
     print('The unique bigrams make up %.1f%% of the corpus' % \
         (100*find_nbr_unique_bigrams_fraction(corpus)))
 
-
-def download_raw_wiki(article_name):
+def download_wikipedia_article(article_name):
     """ Returns the raw text from a Wikipedia article. """
     url = 'http://en.wikipedia.org/w/index.php?title=' + '+'.join(article_name.split(' ')) + '&action=raw'
     response = request.urlopen(url)
-    raw = response.read().decode('utf8')
-    return raw
+    raw_text = response.read().decode('utf8')
+    return raw_text
 
-
-def remove_xml(raw_text):
-    soup = BeautifulSoup(raw_text, 'lxml')
+def remove_xml_html(text):
+    """ Removes xml/html tags from a string. """
+    soup = BeautifulSoup(text, 'lxml')
     return soup.get_text()
 
 def remove_simple_wiki_links(text):
+    """ Removes the brackets around simple Wikipedia article links. """
     simple_link_regex = '\[\[[a-zA-Z ]+\]\]'
     indices_to_remove = []
     for match in re.finditer(simple_link_regex, text):
@@ -215,12 +216,13 @@ def remove_simple_wiki_links(text):
     return text
 
 def remove_inline_references(text):
+    """ Removes Wikipedia inline references. """
     return re.sub('<ref.*</ref>', '', text)
 
-def remove_wiki_markup(raw_text):
-    new_text = remove_simple_wiki_links(raw_text)
+def remove_wiki_markup(text):
+    """ Removes Wikipedia markup. """
+    new_text = remove_simple_wiki_links(text)
     regex_lst = ['\[\[Category:[a-zA-Z ]*\]\]',
-                 '<ref.*<\/ref>', # inline references
                  '\{\{Refbegin\}\}(.|\n)*\{\{Refend\}\}', #Reference section
                  '\{\{About\|.*\}\}', # About section, not really part of the article
                  '==See also==(.*\n)*',
@@ -232,25 +234,31 @@ def remove_wiki_markup(raw_text):
                  '\[\[[a-zA-Z #()-_]*\|', '\[|\]',] # overlayed links 
     for rgx in regex_lst:
         new_text = re.sub(rgx, ' ', new_text)
-    if len(raw_text) != len(new_text): # Recursive call to get rid of nested tags
+    if len(text) != len(new_text): # Recursive call to get rid of nested tags
         return remove_wiki_markup(new_text)
     else:
         return new_text
 
-def clean_articel(raw_text):
+def clean_wikipedia_articel(raw_text):
+    """ Removes xml/html and Wikipedia mark up from a Wikipedia article. """
     clean_text = remove_inline_references(raw_text)
-    clean_text = remove_xml(clean_text)
+    clean_text = remove_xml_html(clean_text)
     clean_text = remove_wiki_markup(clean_text)
     return clean_text
 
 if __name__ == '__main__':
-    import sys
-    if len(sys.argv) != 2:
+    
+    # If incorrect number of command line args, print helpful message    
+    if len(sys.argv) != 2: 
         this_file = os.path.basename(sys.argv[0])
         exit_message = 'Usage: python ' + this_file + \
-        r' "The title of any Wikipedia article"'
+            r' "The title of any Wikipedia article"'
         exit(exit_message)
-    article_name = sys.argv[1].lower()
-    raw = download_raw_wiki(article_name)
-    cleaned_text = clean_articel(raw)
+    
+    article_name = sys.argv[1]
+    raw_text = download_wikipedia_article(article_name)
+    cleaned_text = clean_wikipedia_articel(raw_text)
+    
+    print('Statistics for the Wikipeda article ' + r'"' + article_name + r'"')
+    print('-----------------------------------------------------------------')
     print_corpus_statistics(cleaned_text)
