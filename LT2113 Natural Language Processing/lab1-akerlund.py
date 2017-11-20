@@ -255,13 +255,26 @@ def corpus_size_vs_hapax_fraction(corpus, nbr_slices):
         corpus_sizes[i] = find_nbr_word_tokens(i_corpus)
     return hapax_fractions, corpus_sizes
 
-def make_hapax_plot(corpus, nbr_slices):
+def plot_supcorpus_hapax_fractions(corpus, nbr_slices):
+    """ Plots the hapax fraction for non-overlapping sub-corpuses of equal 
+    size. """
+    hapax_fractions = sub_corpus_hapax_fractions(corpus, nbr_slices)
+    plt.plot(hapax_fractions)
+    plt.xlabel('Slice number')
+    plt.ylabel('Fraction of hapax tokens ')
+    plt.title('Hapax fraction for equal-sized sub-corpuses')
+    plt.ylim([0, 1.2*max(hapax_fractions)])
+    plt.savefig('sub_corpus_hapax_fraction.png', dpi = 800)
+
+def plot_size_vs_hapax(corpus, nbr_slices):
     """ Makes a plot of the hapax fraction as a function of corpus size by 
     dividing the corpus in overlapping sub-corpuses of increasing size. """
     hapax_fractions, corpus_sizes = corpus_size_vs_hapax_fraction(corpus, nbr_slices)
     plt.plot(corpus_sizes, hapax_fractions)
     plt.xlabel('Corpus Size')
-    plt.ylabel('Number of Hapax Words')
+    plt.ylabel('Fraction of hapax tokens ')
+    plt.title('Hapax fraction as a function of corpus size')
+    plt.ylim([0, 1.2*max(hapax_fractions)])
     plt.savefig('size_vs_hapax.png', dpi = 800)
 
 
@@ -300,17 +313,16 @@ def main():
     
     print('Part 1, evaluating the regex')
     print('------------------------------')
-    gold_tokens = get_gold_tokens(nr_files)
-    tokens = tokenize_corpus(corpus)
-    evaluate_tokenization(tokens, gold_tokens)
+    #gold_tokens = get_gold_tokens(nr_files)
+    #tokens = tokenize_corpus(corpus)
+    #evaluate_tokenization(tokens, gold_tokens)
     
     print('\n \n \nPart 2, corpus statistics')
     print('------------------------------')
-    print_corpus_statistics(corpus)
+    #print_corpus_statistics(corpus)
     
-    # make_hapax_plot(corpus, 30) #uncomment to make and save plot
+    plot_supcorpus_hapax_fractions(corpus, 10)
+    plot_size_vs_hapax(corpus, 10) #uncomment to make and save plot
 
 if __name__ == "__main__":
     main()
-
-
