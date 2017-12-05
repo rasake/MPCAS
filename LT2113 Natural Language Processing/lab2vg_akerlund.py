@@ -14,14 +14,18 @@ import lab2_akerlund as lab2
 
 
 def tag_template(*boundaries):
+    """ Returns a Brill tagger rule Template for tags on the postions specified
+    by the boundaries."""
     return Template(*[Pos(b) for b in boundaries])
 
 def word_template(*boundaries):
+    """ Returns a Brill tagger rule Template for words on the postions specified
+    by the boundaries. """
     return Template(*[Word(b) for b in boundaries])
 
 
-
-def my_rule_template():
+def my_rule_templates():
+     """ Returns a list of Templates for the Brill tagger. """
      return [tag_template((-1,-1)),
         tag_template((-2,-1)),
         tag_template((1,1)),
@@ -34,59 +38,55 @@ def my_rule_template():
         word_template((-1,-1),(1,1)),
         Template(Pos([-1]), Word([-2]))]
 
-
-
-def train_hmm_tagger(train_sents, probdist):
-    tagged_words = []
-    tags = []
-    words = []
-    tag_bigrams = []
-    for i_sentence in train_sents:
-        tagged_words.extend([(x[1], x[0]) for x in i_sentence])
-        i_tags = [x[1] for x in i_sentence]
-        tags.extend(i_tags)
-        words.extend([x[0] for x in i_sentence])
-        for bigram in nltk.bigrams(i_tags):#, pad_left=True, pad_right=True, 
-                            #left_pad_symbol="$", right_pad_symbol="$"):
-            tag_bigrams.append((bigram[1], bigram[0]))
-    tag_types = list(set(tags))
-    word_types = list(set(words))
-    transitionsCFD = nltk.ConditionalFreqDist(tag_bigrams)  
-    outputsCFD = nltk.ConditionalFreqDist(tagged_words)
-    outputsCPD = nltk.ConditionalProbDist(outputsCFD, probdist, bins=len(set(tagged_words)))
-    transitionsCPD = nltk.ConditionalProbDist(transitionsCFD, probdist, bins=len(set(tag_bigrams)))
+def train_hmm_tagger(train_sents, probdist):     
+    """ Returns a Hidden Markov Model tagger trained on the train_sents. """
     priorsFD = nltk.FreqDist([x[0][1] for x in train_sents])
     priorsPD = nltk.MLEProbDist(priorsFD)
+    
+    outputsCFD = nltk.ConditionalFreqDist()
+    transitionsCFD = nltk.ConditionalFreqDist()
+    symbols = set([])
+    states = set([])
+    for i_sentence in train_sents:
+        prev_tag = None
+        for (word, tag) in i_sentence:
+            symbols.add(word)
+            states.add(tag)
+            outputsCFD[tag][word] += 1
+            if prev_tag != None:
+                transitionsCFD[prev_tag][tag] += 1
+            prev_tag = tag
+    tag_types = list(states)
+    word_types = list(symbols)
+    transitionsCPD = nltk.ConditionalProbDist(transitionsCFD, probdist, bins=len(tag_types))
+    outputsCPD = nltk.ConditionalProbDist(outputsCFD, probdist, bins=len(word_types))
+    
     tagger = nltk.HiddenMarkovModelTagger(word_types, tag_types, transitionsCPD, outputsCPD, priorsPD)
     return tagger
 
-def find_nbr_missing_items(setA, setB):
-    """ Returns the number of items that are in setB, but not in setA. """
-    return len([x for x in setB if x not in setA])
-
-def extract_words_n_tags(tagged_sentences):
-    """ Return a tuple with (tagged words, words, tags). """
-    tagged_words = []
-    tags = []
-    words = []
-    for i_sentence in tagged_sentences:
-        tagged_words.extend(i_sentence)
-        tags.extend([x[1] for x in i_sentence])
-        words.extend([x[0] for x in i_sentence])
-    return (tagged_sentences, words, tags)
+def train_hmm_tagger_simple(train_sents, probdist):
+    """ Trains an HMM tagger using the built in HiddenMarkovModelTrainer class. """
+    tag_types = list(set(tag for sentence in train_sents for (word, tag) in sentence))
+    word_types = list(set(word for sentence in train_sents for (word, tag) in sentence))
+    trainer = nltk.tag.HiddenMarkovModelTrainer(tag_types, word_types)
+    return trainer.train_supervised(train_sents, estimator = probdist)
 
 
 def part1():
+    """ Trains and evaluates a Brill tagger, prints results to terminal. """
+    print('== Part 2\n')
     news_train, news_test = lab2.split_sents(lab2.brown_tagged_sents('news'))
     (_default, _affix, unitagger, _bi, _tri) = lab2.train_nltk_taggers(news_train)
     baseline_tagger = unitagger
-    trainer = nltk.BrillTaggerTrainer(baseline_tagger, my_rule_template())
+    trainer = nltk.BrillTaggerTrainer(baseline_tagger, my_rule_templates())
     tagger = trainer.train(news_train, max_rules=1000)
     result = tagger.evaluate(news_test)
     print ("Brill tagger with %d rules, evaluated on the %s genre: %.2f%% accuracy" %
            (len(tagger.rules()), "news", 100.0 * result))
 
 def part2():
+    """ Trains and evaluates a few different HMM taggers, prints results to terminal. """
+    print('== Part 2\n')
     news_train, news_test = lab2.split_sents(lab2.brown_tagged_sents('news'))
     
     probdist = lambda fd, bins: nltk.WittenBellProbDist(fd, bins)
@@ -94,12 +94,11 @@ def part2():
     result = tagger.evaluate(news_test)
     print ("HMM tagger, WittenBellProbDist, %.2f%% accuracy" % ( 100.0 * result))
     
-    """
     probdist = lambda fd, bins: nltk.SimpleGoodTuringProbDist(fd, bins)
     tagger = train_hmm_tagger(news_train, probdist)
     result = tagger.evaluate(news_test)
     print ("HMM tagger, SimpleGoodTuringProbDist, %.2f%% accuracy" % ( 100.0 * result))
-    """
+    
     probdist = lambda fd, bins: nltk.LaplaceProbDist(fd, bins)
     tagger = train_hmm_tagger(news_train, probdist)
     result = tagger.evaluate(news_test)
@@ -115,20 +114,11 @@ def part2():
     result = tagger.evaluate(news_test)
     print ("HMM tagger, LidstoneProbDist with gamma=0.01, %.2f%% accuracy" % ( 100.0 * result))
     
-    
     probdist = lambda fd, bins: nltk.LidstoneProbDist(fd, 0.001, bins)
     tagger = train_hmm_tagger(news_train, probdist)
     result = tagger.evaluate(news_test)
     print ("HMM tagger, LidstoneProbDist with gamma=0.001, %.2f%% accuracy" % ( 100.0 * result))
-        
-    """    
-    print('\n Some information about the training and test set')   
-    (_, train_words, train_tags) = extract_words_n_tags(news_train)    
-    (_, test_words, test_tags) = extract_words_n_tags(news_test)   
-    nbr_missing_tokens = len([x for x in test_words if x not in train_words])
-    print('Percentage of word tokens that are in the test sentences but not in the ' +
-        'training set: ' + str(nbr_missing_tokens/len(test_words)))
-    """
 
 if __name__ == '__main__':
+    part1()
     part2()

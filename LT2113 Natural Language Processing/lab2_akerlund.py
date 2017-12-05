@@ -16,9 +16,12 @@ def brown_tagged_sents(genre):
     return nltk.corpus.brown.tagged_sents(categories=genre)
 
 def brown_tagged_words(genre):
+    """Returns the tagged words of the given Brown category."""
     return nltk.corpus.brown.tagged_words(categories=genre)
 
 def print_brown_statistics(list_of_genres):
+    """ Prints a table with some of the statistics for each of the Brown 
+    categories in the list. """
     df = pandas.DataFrame(columns=['Brown genre', 'POS tags', 'Sentences',
                                    'Words', 'Avg. sent. length', 
                                    'Avg. word length'])
@@ -38,6 +41,8 @@ def print_brown_statistics(list_of_genres):
 
 
 def print_common_tag_ngrams(genre, n, rows):
+    """ Prints a table a table with the most common n-grams for given Brown 
+    category."""
     tagged_sents = brown_tagged_sents(genre)
     
     freq_dist = nltk.FreqDist()
@@ -46,7 +51,6 @@ def print_common_tag_ngrams(genre, n, rows):
         for ngram in ngrams(tags, n, pad_left=True, pad_right=True, 
                             left_pad_symbol="$", right_pad_symbol="$"):
             freq_dist[ngram] += 1
-
     N = freq_dist.N()
     cum_freq = 0
     tmp = round(6+0.8*n+4*n**0.5)
@@ -61,11 +65,13 @@ def print_common_tag_ngrams(genre, n, rows):
         print(('{:<' + str(tmp) +'s}{:.2%}    \t{:.2%}').format(ngram_str,
               rel_freq, cum_freq))
 
-
 def split_sents(sents):
+    """ Splits sentences into a training set and a test set. Returns a 
+    tuple (train, test). """
     return (sents[500:len(sents)], sents[0:500],)
 
 def most_common_tag(sents):
+    """ Returns the most common tags in the sentences. """
     tags = []
     for i_sentence in sents:
         tags.extend([x[1] for x in i_sentence])
@@ -73,6 +79,9 @@ def most_common_tag(sents):
     return freqs.most_common(1)[0][0]
 
 def train_nltk_taggers(sents):
+    """ Trains five basic nltk taggers (DefaultTagger, AffixTagger, 
+    UnigramTagger, BigramTagger and TrigramTagger) on the annotated 
+    sentences. """
     default_tag = most_common_tag(sents)
     default_tagger = nltk.DefaultTagger(default_tag)
     afx_tagger = nltk.AffixTagger(sents, backoff=default_tagger)
@@ -82,6 +91,9 @@ def train_nltk_taggers(sents):
     return default_tagger, afx_tagger, uni_tagger, bi_tagger, tri_tagger
     
 def print_nltk_taggers_table(genre):
+    """ Prints a table with the performance of five basic nltk taggers
+    (DefaultTagger, AffixTagger, UnigramTagger, BigramTagger and TrigramTagger)
+    on the give Brown category. """
     train, test = split_sents(brown_tagged_sents(genre))  
     taggers = train_nltk_taggers(train)
     (default_tagger, afx_tagger, uni_tagger, bi_tagger, tri_tagger) = taggers
@@ -103,11 +115,13 @@ def print_nltk_taggers_table(genre):
     print('trigram  \t{:.2%}  \t {:.2f}'.format(accuracy, 1.0/(1.0-accuracy)) 
             + ' words/error')
 
-
 def train_bigram_tagger(sents):
-    return train_nltk_taggers(sents)[2]
+    """ Trains a nltk.BigramTagger on annotated sentences. """
+    return train_nltk_taggers(sents)[2] # this is very innefficient...
 
 def test_on_training_set(genre):
+    """ Compares the perfomance of a Bigram tagger on the training data with
+    its perfomance on the test data. """
     train_sents, test_sents = split_sents(brown_tagged_sents(genre))
     tagger = train_bigram_tagger(train_sents)
     print('Training sentences\tAccuracy\tErrors    \tTesting sentences')
@@ -122,6 +136,8 @@ def test_on_training_set(genre):
             + ' words/error' + '\t' + genre + '-train')
 
 def test_different_genres(train_genre, test_genres):
+    """ Tests the perfomance of a Bigram trained on the training genre on
+    all the genres in test_genres. Prints results to terminal. """
     train_sents, _ = split_sents(brown_tagged_sents(train_genre))
     tagger = train_bigram_tagger(train_sents)    
     print('Training sentences\tAccuracy\tErrors    \tTesting sentences')
@@ -133,13 +149,15 @@ def test_different_genres(train_genre, test_genres):
                 '\t      {:.2f}'.format(1.0/(1.0-accuracy))
                 + ' words/error' + '\t' + genre + '-test')
     
-def train_different_sizes(genre, sizes):
+def train_different_sizes(genre, percentage_lst):
+    """ Tests the perfomance of a Bigram trained on different percentages
+    of the training data for a given Brown category."""
     train_sents, test_sents = split_sents(brown_tagged_sents(genre))
     nbr_train_sents = len(train_sents)
     tagger = train_bigram_tagger(train_sents)
     print('Training sentences\tAccuracy\tErrors    \tTesting sentences')
     print('------------------------------------------------------------------')
-    for i_percentage in sizes:
+    for i_percentage in percentage_lst:
         i_train_sents = train_sents[0:round(nbr_train_sents*i_percentage/100)]
         tagger = train_bigram_tagger(i_train_sents)
         accuracy = tagger.evaluate(test_sents)
@@ -147,15 +165,15 @@ def train_different_sizes(genre, sizes):
                 + '\t{:.2%}'.format(accuracy) + 
                 '\t      {:.2f}'.format(1.0/(1.0-accuracy))
                 + ' words/error' + '\t' + genre + '-test')
-        
-
 
 def part1():
+    """ This is the main function for the first part of this assignment. """
     print('== Part 1\n')
     print_brown_statistics(["fiction", "government", "news", "reviews"])
     print('')
 
-def part2():
+def part2():    
+    """ This is the main function for the second part of this assignment. """
     print('== Part 2\n')
     print_common_tag_ngrams(["news"], 1, 10)
     print('')    
@@ -165,11 +183,13 @@ def part2():
     print('')
 
 def part3():
+    """ This is the main function for the second part of this assignment. """
     print('== Part 3\n')
     print_nltk_taggers_table('news')
     print('')
 
 def part4():
+    """ This is the main function for the fourth part of this assignment. """
     print('== Part 4\n')
     test_on_training_set('news')
     print('')
