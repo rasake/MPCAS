@@ -1,0 +1,89 @@
+=========== Q1 ===============
+Ex1: "You held your breath and the door for me"
+The funny thing here is that although the sentence is correct English, it still sounds a bit wierd, it would be more natural to say 
+"You held your breath, and you held the door for me". The reason it sounds weird is because the word sense of "held" is different in "held your breath" than in "held the door".
+
+Ex2: "[...] there is now a growing number of little boys inflicted with the name ”Commando”"
+This is a witty way of say two things at once: that a growing number of little boys are given the name Commando, and that is likely to not be a lot of fun for the kids to be named Commando. The humour arises from that the inflicted is typically not used with a name
+
+Ex3: "Period when psychiatrists ruled?" "Shrinkage"
+The humour here comes from that the noun+"age" is a common construct in English ("stone age" etc), but there is no such thing as the "Shrink age", and "shrinkage" is a word, but it does not mean "the age of psychiatrists (i.e. shrinks)".
+
+
+My own example of something (not so) funny: "Autumn leaves a mess for gardener Roy Cooper" as a headline for a newspaper article about the tasks of the gardener Roy Cooper in fall. The witty thing is that leaves could both be a a verb, or it couls be a noun.
+
+
+
+
+=========== Q2 ===============
+
+Most Informative Features
+      contains(delights)    indicates:      positive review
+     contains(strongest)    indicates:      positive review
+    contains(annoyingly)    indicates:      negative review
+        contains(sloppy)    indicates:      negative review
+      contains(fondness)    indicates:      positive review
+      contains(optimism)    indicates:      positive review
+    contains(dedication)    indicates:      positive review
+         contains(coats)    inidcates:      positive review
+       contains(kidnaps)    inidcates:      negative review
+    contains(recreating)    inidcates:      positive review
+          contains(aura)    inidcates:      positive review
+      contains(invading)    inidcates:      positive review
+     contains(stylishly)    inidcates:      positive review
+         contains(anton)    inidcates:      positive review
+      contains(billions)    inidcates:      negative review
+ contains(frankenheimer)    inidcates:      negative review
+         contains(lange)    inidcates:      negative review
+      contains(flawless)    inidcates:      positive review
+      contains(reigning)    inidcates:      positive review
+    contains(consultant)    inidcates:      negative review
+     contains(punchline)    inidcates:      negative review
+       contains(quicker)    inidcates:      negative review
+     contains(radiation)    inidcates:      negative review
+    contains(attributes)    inidcates:      negative review
+        contains(sexist)    inidcates:      negative review
+         contains(bland)    inidcates:      negative review
+         contains(sings)    inidcates:      positive review
+    contains(revolution)    inidcates:      positive review
+         contains(fares)    inidcates:      negative review
+         contains(tracy)    inidcates:      positive review
+
+Some of these features make sense, for instance it seems logical that a review that uses the words "flawless", "delights" and "dedication", weheras words like "bland", "sloppy" and "annoyingly" carries negative connnotations. Other features are a bit strange, like why would a good reviews use "tracy" more often than bad ones? Maybe "Tracy" is the name of a really good actress.
+
+Another intresting observation is the word "punchline". Generally we would say that a punchline is good thing for a movie to have, but how come it being in the review indicates the review is bad? On could speculate that maybe the punchline is only discussed in a review when it is lacking in the film...
+
+=========== Q3 ===============
+
+--- Diacritic restoration ---
+(e.g. cote to côté, alska to älska)
+Use sorrounding letters, maybe previous 3 previous letters and 4 subsequent letters? Not so good, we if we only look at the letter, we wouldn't spot the difference between "är" och "år", we probably have to take the context into account as well. 
+
+Instead, we look at whole words, so the classifing task is: 
+Given the word w, for example 'ar', classify based on the context which word it should be changed to (for example "är" or "år"). So, technically, we would build a separate classifier for each "restorable" word. Also, for many words there are only one correct word, for example "drang" -> "dräng", so for those words the classification task is trivial.
+ 
+What features should we extract from the context? The POS tags for the previous and subsuquent word could be a good start. That would make feature space quit small and manageable, but it requires a pre-processing step (the tagging). Another option that would add more granularity is using the surrounding words in them self as features.
+
+Ok, so now let's build the classifier. I would propose a Naive Bayes classifier. First we construct a giant look up table with the probabilities P(feature_i|word_with_special_character) that we estimate from a corpus using MLE. For instance, to calculate the probability of the previos word being "jag" given that the current word is "är" we count the number of occurences of "jag" that are followed by "är" and divide with the total number of occurences of the word "är". When we have constructed this table based on the training corpus we can classify a new data point with a feature vector f by choosing from the candidate words the one that maximizes P(f|word) = PROD[P(f_i|word)]*P(word) where P(word) is the prior (also estimate using MLE). The "Naive" part here is that we assume that the features are independent so that we can use the product, which is nice since the joint probabilities are harder to estimate because of their sparseness.
+
+--- Spam filtering ---
+For the spam filtering, I would propose using the presence of some typical "spam words" as a feature. We could use the same approach as n Question 3, letting the features being the presence or absence of the 200 most common words in the vocabulary, but some of the most informative words when it come to spam email (like "viagra", "money" etc) are no really that frequent in ordinary emails, so we should use the 200 most common words in the spam emails, rather than the 200 most common words in all the letters.
+
+Then we can use a Naive Bayes Classifier for example.
+
+
+
+
+=========== Q4 ===============
+
+4a) entropy: -0.000
+4b) entropy: 1.000
+4c) entropy: 1.842
+
+4d) 
+Entropy for name+species jointly: 2.750
+Entropy for names only: 2.156
+Entropy for species only: 0.954
+
+ * The more unique labels, the more possible outcomes, thus the higher the entropy.
+ * If we add more 'addvarks' to 4c, the entropy will go down since probabilties become more uneven. They highest entropy you can have for a set of possible labels is if all labels are equally probable.
