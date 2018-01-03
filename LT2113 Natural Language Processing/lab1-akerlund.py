@@ -189,47 +189,38 @@ def find_most_frequent_words_fraction(corpus, N):
     sorted_freqs.reverse()
     return sum([x[1] for x in sorted_freqs[0:N]])/find_nbr_word_tokens(corpus)
 
-def find_nbr_bigrams(corpus):
-    """ Returns the total number of bigrams in the corpus. """
-    tokens = tokenize_corpus(corpus)
-    bigrams = list(nltk.bigrams(tokens))
-    return len(bigrams)
 
 def find_nbr_unique_bigrams(corpus):
-    """ Returns the number of unique bigrams in the corpus. """
+    """ Returns the number of unique bigrams in the corpus, in absolute numbers
+    and as a fraction of all the bigrams. """
     tokens = tokenize_corpus(corpus)
     bigrams = nltk.bigrams(tokens)
     freqs = nltk.FreqDist(bigrams)
     nbr_unique = 0
+    tots = 0
     for sample in freqs:
+        tots += 1
         if freqs[sample] == 1:
             nbr_unique += 1
-    return nbr_unique
+    fraction = nbr_unique/tots
+    return nbr_unique, fraction
 
-def find_nbr_unique_bigrams_fraction(corpus):
-    """ Returns the fraction of bigrams in the corpus that unique. """
-    return find_nbr_unique_bigrams(corpus) / find_nbr_bigrams(corpus)
-
-def find_nbr_trigrams(corpus):    
-    """ Returns the total number of trigrams in the corpus. """
-    tokens = tokenize_corpus(corpus)
-    trigrams = list(nltk.trigrams(tokens))
-    return len(trigrams)
 
 def find_nbr_unique_trigrams(corpus):
-    """ Returns the number of unique trigrams in the corpus. """
+    """ Returns the number of unique trigrams in the corpus, in absolute numbers
+    and as a fraction of all the bigrams. """
     tokens = tokenize_corpus(corpus)
     trigrams = nltk.trigrams(tokens)
     freqs = nltk.FreqDist(trigrams)
     nbr_unique = 0
+    tots = 0
     for sample in freqs:
+        tots += 1
         if freqs[sample] == 1:
             nbr_unique += 1
-    return nbr_unique
+    fraction = nbr_unique/tots
+    return nbr_unique, fraction
 
-def find_nbr_unique_trigrams_fraction(corpus):
-    """ Returns the fraction of trigrams in the corpus that unique. """
-    return find_nbr_unique_trigrams(corpus) / find_nbr_trigrams(corpus)
 
 def sub_corpus_hapax_fractions(corpus, nbr_slices):
     """ Divides the corpus in equal-sized slices and returns the fraction of 
@@ -300,29 +291,31 @@ def print_corpus_statistics(corpus):
         '%, '.join( \
         ['%.1f' % (100*x) for x in corpus_size_vs_hapax_fraction(corpus, 10)[0]]) + \
         '%')
-    print('Number of unique bigrams: %d' % find_nbr_unique_bigrams(corpus))
+    nbr_unique, fraction = find_nbr_unique_bigrams(corpus)
+    print('Number of unique bigrams: %d' % nbr_unique)
     print('The unique bigrams make up %.1f%% of the corpus' % \
-        (100*find_nbr_unique_bigrams_fraction(corpus)))
-    print('Number of unique trigrams: %d' % find_nbr_unique_trigrams(corpus))
+        (100*fraction))
+    nbr_unique, fraction = find_nbr_unique_trigrams(corpus)
+    print('Number of unique trigrams: %d' % nbr_unique)
     print('The unique trigrams make up %.1f%% of the corpus' % \
-        (100*find_nbr_unique_trigrams_fraction(corpus)))
+        (100*fraction))
 
 def main():
-    nr_files = 150
+    nr_files = 199
     corpus = get_corpus_text(nr_files)
     
     print('Part 1, evaluating the regex')
     print('------------------------------')
-    #gold_tokens = get_gold_tokens(nr_files)
-    #tokens = tokenize_corpus(corpus)
-    #evaluate_tokenization(tokens, gold_tokens)
+    gold_tokens = get_gold_tokens(nr_files)
+    tokens = tokenize_corpus(corpus)
+    evaluate_tokenization(tokens, gold_tokens)
     
     print('\n \n \nPart 2, corpus statistics')
     print('------------------------------')
-    #print_corpus_statistics(corpus)
+    print_corpus_statistics(corpus)
     
-    plot_supcorpus_hapax_fractions(corpus, 10)
-    plot_size_vs_hapax(corpus, 10) #uncomment to make and save plot
+    #plot_supcorpus_hapax_fractions(corpus, 10)
+    #plot_size_vs_hapax(corpus, 10) #uncomment to make and save plot
 
 if __name__ == "__main__":
     main()
