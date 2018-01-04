@@ -217,7 +217,7 @@ def remove_simple_wiki_links(text):
 
 def remove_inline_references(text):
     """ Removes Wikipedia inline references. """
-    return re.sub('<ref.*</ref>', '', text)
+    return re.sub('<ref>.*</ref>', '', text)
 
 def remove_wiki_markup(text):
     """ Removes Wikipedia markup. """
@@ -226,14 +226,18 @@ def remove_wiki_markup(text):
                  '\{\{Refbegin\}\}(.|\n)*\{\{Refend\}\}', #Reference section
                  '\{\{About\|.*\}\}', # About section, not really part of the article
                  '==See also==(.*\n)*',
-                 '=+[a-zA-Z ()]+=+', # Headers
+                 '=+[a-zA-Z0-9 \-(),]+=+', # Headers
                  '[*]', # Bullet points,
-                 '\[\[:*(File|Media)(.)*\]\]',  # Images etc
-                 '\https://[a-zA-Z0-9./-]+ ', # hyperlinks
+                 '\[\[:*(File|Media|Image)(.)*\]\]',  # Images etc
+                 'https*://[a-zA-Z0-9./-]+ ', # hyperlinks
                  r'\{\{(\n|[^{}])*}\}', # citations and more
-                 '\[\[[a-zA-Z #()-_]*\|', '\[|\]',] # overlayed links 
+                 r'\{\|(\n|[^{}])*\|\}', # citations and more
+                 '\[\[[a-zA-Z #()-_]*\|', '\[|\]', # overlayed links 
+                 r'^;',
+                 '  *'] #multiple whitespaces
     for rgx in regex_lst:
         new_text = re.sub(rgx, ' ', new_text)
+    new_text = re.sub(r'^\u003B *', '', new_text, flags=re.MULTILINE)
     if len(text) != len(new_text): # Recursive call to get rid of nested tags
         return remove_wiki_markup(new_text)
     else:
@@ -262,3 +266,4 @@ if __name__ == '__main__':
     print('Statistics for the Wikipeda article ' + r'"' + article_name + r'"')
     print('-----------------------------------------------------------------')
     print_corpus_statistics(cleaned_text)
+    #print(cleaned_text)
