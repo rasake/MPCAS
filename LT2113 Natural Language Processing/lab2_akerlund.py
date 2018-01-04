@@ -117,7 +117,7 @@ def print_nltk_taggers_table(genre):
 
 def train_bigram_tagger(sents):
     """ Trains a nltk.BigramTagger on annotated sentences. """
-    return train_nltk_taggers(sents)[2] # this is very innefficient...
+    return train_nltk_taggers(sents)[3] # this is very innefficient...
 
 def test_on_training_set(genre):
     """ Compares the perfomance of a Bigram tagger on the training data with
