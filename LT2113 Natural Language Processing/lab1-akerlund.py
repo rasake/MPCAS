@@ -85,12 +85,7 @@ def evaluate_tokenization(test_tokens, gold_tokens):
             false_positives += test_to - test_from
             false_negatives += gold_to - gold_from
             error_chunks += 1
-            tmp = test_tokens[test_from:test_to]
-            try:
-                test_chunk = " ".join(test_tokens[test_from:test_to])
-            except TypeError as e:
-                print(tmp)
-                raise(e)
+            test_chunk = " ".join(test_tokens[test_from:test_to])
             gold_chunk = " ".join(gold_tokens[gold_from:gold_to])
             print("%6d%30s  |  %-30s%d" % (test_from, test_chunk, gold_chunk, gold_from))
     precision = 1.0 * true_positives / (true_positives + false_positives)
@@ -190,6 +185,18 @@ def find_most_frequent_words_fraction(corpus, N):
     return sum([x[1] for x in sorted_freqs[0:N]])/find_nbr_word_tokens(corpus)
 
 
+def find_nbr_bigram_types(corpus):
+    """ Returns the number of bigrams types in the corpus, in absolute numbers
+    and as a fraction of all the bigrams. """
+    tokens = tokenize_corpus(corpus)
+    bigrams = nltk.bigrams(tokens)
+    freqs = nltk.FreqDist(bigrams)
+    nbr_types = freqs.B()
+    nbr_tokens = freqs.N()
+    fraction = nbr_types/nbr_tokens
+    return nbr_types, fraction
+
+
 def find_nbr_unique_bigrams(corpus):
     """ Returns the number of unique bigrams in the corpus, in absolute numbers
     and as a fraction of all the bigrams. """
@@ -205,6 +212,16 @@ def find_nbr_unique_bigrams(corpus):
     fraction = nbr_unique/tots
     return nbr_unique, fraction
 
+def find_nbr_trigram_types(corpus):
+    """ Returns the number of trigrams types in the corpus, in absolute numbers
+    and as a fraction of all the trigrams. """
+    tokens = tokenize_corpus(corpus)
+    trigrams = nltk.trigrams(tokens)
+    freqs = nltk.FreqDist(trigrams)
+    nbr_types = freqs.B()
+    nbr_tokens = freqs.N()
+    fraction = nbr_types/nbr_tokens
+    return nbr_types, fraction
 
 def find_nbr_unique_trigrams(corpus):
     """ Returns the number of unique trigrams in the corpus, in absolute numbers
@@ -291,14 +308,10 @@ def print_corpus_statistics(corpus):
         '%, '.join( \
         ['%.1f' % (100*x) for x in corpus_size_vs_hapax_fraction(corpus, 10)[0]]) + \
         '%')
-    nbr_unique, fraction = find_nbr_unique_bigrams(corpus)
-    print('Number of unique bigrams: %d' % nbr_unique)
-    print('The unique bigrams make up %.1f%% of the corpus' % \
-        (100*fraction))
-    nbr_unique, fraction = find_nbr_unique_trigrams(corpus)
-    print('Number of unique trigrams: %d' % nbr_unique)
-    print('The unique trigrams make up %.1f%% of the corpus' % \
-        (100*fraction))
+    nbr_types, fraction = find_nbr_bigram_types(corpus)
+    print(('Number of bigram types: %d' % nbr_types) + (', that is  %.1f%% of the corpus' % (100*fraction)))
+    nbr_types, fraction = find_nbr_trigram_types(corpus)
+    print(('Number of trigram types: %d' % nbr_types) + (', that is  %.1f%% of the corpus' % (100*fraction)))
 
 def main():
     nr_files = 199
